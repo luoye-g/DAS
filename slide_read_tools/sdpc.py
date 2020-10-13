@@ -6,15 +6,16 @@ from slide_read_tools.libs.sdpc.sdpc import Sdpc
 class SdpcProxy:
 
     def __init__(self):
-        self.ors = Sdpc()
+        self._ors = Sdpc()
 
     def open(self, slide_path):
         '''
         :param slide_path:
         :return, :
         '''
-        self._ors = self.ors.OpenSlide(slide_path)
+        self._ors.open(slide_path)
         self._proporties = self._ors.getAttrs()
+        print(self._proporties)
 
     def mpp(self): return self._mppx()
     def _mppx(self): return self._proporties['mpp']

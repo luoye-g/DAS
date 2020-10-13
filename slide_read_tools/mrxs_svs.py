@@ -1,6 +1,6 @@
 import openslide
 
-class MrxsSvsProxy:
+class MrxsProxy:
 
     def __init__(self):
         self._ors = None
@@ -12,6 +12,7 @@ class MrxsSvsProxy:
         '''
         self._ors = openslide.OpenSlide(slide_path)
         self._proporties = self._ors.properties
+        print(self._proporties)
 
     def mpp(self): return self._mppx()
     def _mppx(self): return self._proporties['openslide.mpp-x']
@@ -27,4 +28,4 @@ class MrxsSvsProxy:
             self._ors.close()
 
 
-msr = MrxsSvsProxy()
+mrr = MrxsProxy()
