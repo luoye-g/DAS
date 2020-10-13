@@ -9,15 +9,15 @@ out_path = 'H:/TCTDATA'
 pro_method = 'Non-BD'
 image_method = 'WNLO'
 
-slide_group = 'Shengfuyou_3th'
+slide_group = 'Shengfuyou_5th'
 slide_forma = 'svs'
 format_trans = None
 is_positive = 'Yes'
 x = '20x'
 sub_class = None
 is_hard = 'No'
-sli_path = os.path.join(out_path, 'WNLO/Shengfuyou_3th/positive')
-xml_path = os.path.join(out_path, 'WNLO/LabelFiles/xml_Shengfuyou_3th')
+sli_path = os.path.join(out_path, 'WNLO/Shengfuyou_5th/positive')
+xml_path = os.path.join(out_path, 'WNLO/LabelFiles/xml_Shengfuyou_5th')
 
 unified_xml_path = 'L:/GXB/unified_xml'
 xmls = [x for x in os.listdir(xml_path) if x.find('.xml') != -1]
@@ -31,7 +31,7 @@ if not os.path.exists(concrete_path):
 
 # convert xml to unified xml
 for k, xml in enumerate(xmls):
-    # if k <= 80:
+    # if k <= 0:
     #     continue
     slide_name = xml[: xml.find('.xml')]
     s_path = os.path.join(sli_path, slide_name + '.' + slide_forma)
