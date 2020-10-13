@@ -1,3 +1,6 @@
+import sys
+sys.path.append('../')
+
 from format_conversion.libs._xml_tools import __read_xml_by_path__
 from format_conversion.libs._xml_tools import __save_xml_by_annos__
 from format_conversion.libs._xml_tools import __read_xml_by_slide__

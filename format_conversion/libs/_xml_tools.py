@@ -176,10 +176,11 @@ def __read_xml_by_slide__(xml_path, slide_path, slide_batch, pro_method, image_m
             seg = '/'
         slide_name = slide_path[slide_path.rfind(seg) + 1:]
         slide_path = slide_path[:slide_path.rfind(seg)]
+        slide_path = slide_path.replace('/', '\\')
         mpp = slide_proxy.mpp()
 
         # modify person's name and last modify time
-        m_name = 'None'
+        m_name = 'csh'
         m_time = time.strftime('"%Y-%m-%d %I:%M:%S"', time.localtime(os.stat(xml_path).st_ctime))
         modify_info = ModifyInfo(m_name, m_time)
 
