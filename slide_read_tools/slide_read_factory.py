@@ -1,10 +1,12 @@
 from slide_read_tools.mrxs_svs import msr
+from slide_read_tools.sdpc import sdr
 
 class SlideReaderFactory:
 
     def __init__(self):
         self._support_format = {'mrxs':  msr,
-                               'svs':   msr}
+                                'svs':   msr,
+                                'sdpc': sdr}
 
     def get_proxy(self, slide_format):
         '''
