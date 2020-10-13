@@ -8,7 +8,7 @@ class MrxsSvsProxy:
     def open(self, slide_path):
         '''
         :param slide_path:
-        :return:
+        :return, '\\':
         '''
         self._ors = openslide.OpenSlide(slide_path)
         self._proporties = self._ors.properties
