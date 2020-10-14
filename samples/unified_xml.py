@@ -6,18 +6,18 @@ from xml_tools import read_xml_by_slide, save_xml_slide_anno
 from mexception import SlideError
 
 out_path = 'H:/TCTDATA'
-pro_method = 'Non-BD'
-image_method = 'WNLO'
+pro_method = 'BD'
+image_method = 'BD'
 
-slide_group = 'Shengfuyou_5th'
-slide_forma = 'svs'
+slide_group = 'Tongji_11th'
+slide_forma = 'srp'
 format_trans = None
 is_positive = 'Yes'
 x = '20x'
 sub_class = None
 is_hard = 'No'
-sli_path = os.path.join(out_path, 'WNLO/Shengfuyou_5th/positive')
-xml_path = os.path.join(out_path, 'WNLO/LabelFiles/xml_Shengfuyou_5th')
+sli_path = os.path.join(out_path, 'BD/Tongji_11th/positive/BD')
+xml_path = os.path.join(out_path, 'BD/Tongji_11th/Labelfiles/BD')
 
 unified_xml_path = 'L:/GXB/unified_xml'
 xmls = [x for x in os.listdir(xml_path) if x.find('.xml') != -1]

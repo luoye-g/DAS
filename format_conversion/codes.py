@@ -17,6 +17,7 @@
     'mould'         0810
     'nn'            0811
     'pp'            0812
+    'Neg'           0813
 '''
 class cc:
     code_to_class = {
@@ -27,6 +28,7 @@ class cc:
         '2120': 'LSIL',
         '3000': 'others',
         '2222': 'AGC',
+        '2211': 'AEC',
         '2140': 'SCC',
         '2213': 'AGC_NOS',
         '0000': 'normal_0000',
@@ -61,7 +63,9 @@ class cc:
         '0809': 'pos',
         '0810': 'mould',
         '0811': 'nn',
-        '0812': 'pp'
+        '0812': 'pp',
+        '0813': 'Neg',
+        '1300': 'Endometrium',
     }
 
     class_to_code = {
@@ -80,6 +84,7 @@ class cc:
         'nGEC':         '0200',
         'nGEC_0.0':     '0200',
         'nGEC_0.100':   '0200',
+        'NGEC':         '0200',
         'LSIL':         '2120',
         'LISL':         '2120',
         'LSIL_0.0':     '2120',
@@ -105,6 +110,7 @@ class cc:
         'IUD':          '1123',
         '1112':         '1112',
         'AGC':          '2222',
+        'AEC':          '2211',
         '1121':         '1121',
         '1250':         '1250',
         '1240':         '1240',
@@ -147,6 +153,8 @@ class cc:
         'trichomonad':  '1210',
         'nn':           '0811',
         'pp':           '0812',
+        'Neg':          '0813',
+        'Endometrium':  '1300',  # 子宫内膜细胞
     }
 
     type_name = ["HSIL", "LSIL", "ASC-US", "AGC", "nGEC", "HCG", "SSC", "Candidate"]  # , "Normal"] #normal 不需要展示
