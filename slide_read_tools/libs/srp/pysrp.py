@@ -16,7 +16,10 @@ class Srp(object):
             dll_path = 'srp.dll'
         else:
             raise TypeError('Not supported system:{}'.format(os.name))
-
+        current_file_path = os.path.abspath(__file__)
+        os.environ['PATH'] += os.pathsep + os.path.split(current_file_path)[0]
+        dll_path = os.path.join(os.path.split(current_file_path)[0], dll_path)
+        print(dll_path)
         self.__dll = ctypes.cdll.LoadLibrary(dll_path)
         self.__dll.Open.argtypes = [ctypes.c_char_p]
         self.__dll.Open.restype = ctypes.c_ulonglong
@@ -212,3 +215,6 @@ class Srp(object):
             anno = self.__read_manual_anno(n)
             annos.append(anno)
         return annos
+
+if __name__ == '__main__':
+    sr = Srp()
