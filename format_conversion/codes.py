@@ -15,6 +15,8 @@
     'pos'           0809
     未知
     'mould'         0810
+    'nn'            0811
+    'pp'            0812
 '''
 class cc:
     code_to_class = {
@@ -58,12 +60,15 @@ class cc:
         '0807': 'deleted_0.100',
         '0809': 'pos',
         '0810': 'mould',
+        '0811': 'nn',
+        '0812': 'pp'
     }
 
     class_to_code = {
         'ASC-H':        '2112',
         'ASC-H_0.0':    '2112',
         'ASC-H_0.100':  '2112',
+        'ASCH':         '2112',
         'ASC-US':       '2111',
         'ASC-US_0.0':   '2111',
         'ASC-US_0.100': '2111',
@@ -125,6 +130,7 @@ class cc:
         'null':         '0700',
         '0.914063632488':'0700',
         'wrongDidu':    '0700',
+        '2_920':        '0700',
         'nplus':        '0801',
         'nplus_0.0':    '0801',
         'singel':       '0802',
@@ -139,6 +145,8 @@ class cc:
         'pos':          '0809',
         'mould':        '0810',
         'trichomonad':  '1210',
+        'nn':           '0811',
+        'pp':           '0812',
     }
 
     type_name = ["HSIL", "LSIL", "ASC-US", "AGC", "nGEC", "HCG", "SSC", "Candidate"]  # , "Normal"] #normal 不需要展示

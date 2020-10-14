@@ -10,17 +10,26 @@ class SvsProxy:
         :param slide_path:
         :return, '\\':
         '''
+        # print(slide_path)
         self._ors = openslide.OpenSlide(slide_path)
         self._proporties = self._ors.properties
-        print(self._proporties)
+        # print(self._proporties)
 
     def mpp(self): return self._mppx()
     def _mppx(self): return self._proporties['aperio.MPP']
     def _mppy(self): return self._proporties['aperio.MPP']
-    def boundsx(self): return self._proporties['aperio.Left']
-    def boundsy(self): return self._proporties['aperio.Top']
-    def width(self): return self._proporties['aperio.OriginalWidth']
-    def height(self): return self._proporties['aperio.Originalheight']
+    def boundsx(self): 
+        try:
+            return self._proporties['aperio.Left']
+        except:
+            return 0
+    def boundsy(self): 
+        try:
+            return self._proporties['aperio.Top']
+        except:
+            return 0
+    def width(self): return self._proporties['openslide.level[0].width']
+    def height(self): return self._proporties['openslide.level[0].height']
 
 
     def close(self):
