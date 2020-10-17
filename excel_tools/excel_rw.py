@@ -2,11 +2,101 @@
 import xlwt
 import xlrd
 import os
+from mysql.sql_con import MySQLProxy
 
 hard_slide_path = 'E:/desktop/fql_on/hard_slide'
 
+def excel_read1(excel_path):
+    '''
+    读取切片判断信息
+    :param excel_path:
+    :return:
+    '''
+    sql_proxy = MySQLProxy()
+    sql_proxy.connect()
+    excel = xlrd.open_workbook(excel_path)
+    for k, sheet_name in enumerate(excel.sheet_names()):
+        if sheet_name != 'tj10 review part':
+            continue
+        print(sheet_name, type(sheet_name))
+        sheet = excel.sheet_by_name(sheet_name)
+        data = dict()
+        data['slide_format'] = 'srp'
+        data['pro_method'] = 'BD'
+        data['image_method'] = 'BD'
+        data['Medical_history'] = 'null'
+        data['is_positive'] = 'Yes'
+        data['slide_group'] = 'Tongji_10th'
+        for row_index in range(sheet.nrows):
+            row_vs = sheet.row(row_index)
+            if row_index < 1:
+                continue
+            # print(row_vs)
+            slide_name = row_vs[0].value.strip()
+            method = row_vs[1].value.strip()
+            if slide_name.find('.srp') == -1:
+                slide_name += '.srp'
+
+            remarks = row_vs[5].value.strip()
+            sub_class = row_vs[4].value.strip()
+            if sub_class.find('(') != -1:
+                sub_class = sub_class[: sub_class.find('(')]
+            if sub_class.find('（') != -1:
+                sub_class = sub_class[: sub_class.find('（')]
+
+            if sub_class != '':
+                data['slide_name'] = slide_name
+                data['sub_class'] = sub_class
+                data['remarks'] = remarks
+                data['age'] = -1
+                print(data)
+                data['Medical_history'] = 'null'
+                sql_proxy.insert_into_slide_sub_class(data)
+
+    sql_proxy.close()
+
+
+def excel_read2(excel_path):
+    '''
+    临时函数，读取hard_slide.xls，并且插入到数据库
+    :param excel_path:
+    :return:
+    '''
+    sql_proxy = MySQLProxy()
+    sql_proxy.connect()
+    excel = xlrd.open_workbook(excel_path)
+    for k, sheet_name in enumerate(excel.sheet_names()):
+
+        print(sheet_name, type(sheet_name))
+        sheet = excel.sheet_by_name(sheet_name)
+        data = dict()
+
+        for row_index in range(sheet.nrows):
+            row_vs = sheet.row(row_index)
+            if row_index < 1:
+                continue
+            # print(row_vs)
+            data['slide_name'] = row_vs[3].value
+            data['slide_group'] = row_vs[2].value
+            data['slide_format'] = row_vs[4].value
+            data['pro_method'] = row_vs[0].value
+            data['image_method'] = row_vs[1].value
+            data['is_positive'] = row_vs[5].value
+            data['slide_classify_score'] = -1 if row_vs[6].value == '' else row_vs[6].value
+            data['pos_num'] = -1 if row_vs[7].value == '' else row_vs[7].value
+            data['recon_num'] = -1 if row_vs[8].value == '' else row_vs[8].value
+            data['jppos_22'] = -1 if row_vs[9].value == '' else row_vs[9].value
+            data['full_anno'] = row_vs[10].value
+            data['sub_class'] = row_vs[11].value
+            data['p_10_5Num'] = -1 if row_vs[12].value == '' else row_vs[12].value
+            sql_proxy.insert_into_slide_hard(data)
+            print(data)
+
+    sql_proxy.close()
+
 def excel_read(excel_path):
     '''
+    读取困难切片信息
     :param excel_path:  path of excel path
     :return:
     '''
@@ -155,8 +245,8 @@ def excel_write(excel_path, data=None):
 
 if __name__ == '__main__':
 
-    excel_path = 'E:/desktop/fql_on/szsqlHardSlides.xlsx'
-    # excel_read(excel_path)
+    excel_path = 'hard_slide_unified.xls'
+    excel_read2(excel_path)
 
-    excel_unified_hard()
+    # excel_unified_hard()
     # excel_write('L:/GXB/fql_on/text.xls')
