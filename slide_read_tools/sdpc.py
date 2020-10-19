@@ -16,6 +16,12 @@ class SdpcProxy:
         self._ors.open(slide_path)
         self._proporties = self._ors.getAttrs()
         print(self._proporties)
+        if len(self._proporties.keys()) == 0:
+            self._proporties = {
+                'mpp': -1,
+                'width': -1,
+                'height': -1,
+            }
 
     def mpp(self): return self._mppx()
     def _mppx(self): return self._proporties['mpp']

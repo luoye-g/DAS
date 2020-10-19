@@ -15,7 +15,7 @@ class SrpProxy:
         '''
         self._ors.open(slide_path)
         self._proporties = self._ors.getAttrs()
-        print(self._proporties)
+        # print(self._proporties)
 
     def mpp(self): return self._mppx()
     def _mppx(self): return self._proporties['mpp']

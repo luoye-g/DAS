@@ -1,8 +1,8 @@
-# coding=gbk
+
 import MySQLdb
 
 HOST = 'localhost'
-USER = 'root'
+USER = 'gxb'
 PASSWORD = '1181895140'
 DB = 'das'
 CHARSET = 'utf8'
@@ -23,8 +23,8 @@ class MySQLProxy:
 
     def insert_into_slide_sub_class(self, data):
         '''
-        Ïòslide_sub_class±íÖĞ²åÈëÊı¾İ
-        :param data: Êı¾İ×éÖ¯·½Ê½Îª×Öµä
+        ï¿½ï¿½slide_sub_classï¿½ï¿½ï¿½Ğ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        :param data: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¯ï¿½ï¿½Ê½Îªï¿½Öµï¿½
         :return:
         '''
         # print(data)
@@ -47,7 +47,7 @@ class MySQLProxy:
 
     def create_slide_sub_class(self):
         '''
-        ´´½¨slide_sub_class±í
+        ï¿½ï¿½ï¿½ï¿½slide_sub_classï¿½ï¿½
         :return:
         '''
         create_table_sql = '''
@@ -69,7 +69,7 @@ class MySQLProxy:
 
     def create_slide_hard(self):
         '''
-        ´´½¨À§ÄÑÇĞÆ¬±í
+        ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¬ï¿½ï¿½
         :return:
         '''
         create_table_sql = '''
@@ -94,10 +94,51 @@ class MySQLProxy:
         cursor = self._db.cursor()
         cursor.execute(create_table_sql)
 
+    def insert_into_slides(self, slide):
+        sql = """insert into slides
+          (slide_path, slide_name, slide_group, pro_method, image_method, mpp, zoom, 
+          slide_format, is_positive, width, height, bounds_x, bounds_y)
+          VALUES 
+          ('%s', '%s', '%s', '%s', '%s', %s, '%s', '%s', '%s', %s, %s, %s, %s);
+          """ % (slide.slide_path(), slide.slide_name(), slide.slide_group(), slide.pro_method(),
+                 slide.image_method(), slide.mpp(), slide.zoom(), slide.slide_format(),
+                 slide.is_positive(), slide.width(), slide.height(), slide.bounds_x(), slide.bounds_y())
+        try:
+            cursor = self._db.cursor()
+            cursor.execute(sql)
+            self._db.commit()
+        except(MySQLdb._exceptions.IntegrityError):
+            self._db.rollback()
+            print('data duplicate ..... ')
+
+    def insert_into_annotations(self, data, anno):
+        query_sql = 'select sid from slides where slide_path = \'%s\' and slide_name = \'%s\'' \
+        % (data['slide_path'], data['slide_name'])
+        cursor = self._db.cursor()
+        cursor.execute(query_sql)
+        # è·å–æ‰€æœ‰è®°å½•åˆ—è¡¨
+        results = cursor.fetchall()
+        sid = 0
+        for row in results:
+            sid = row[0]
+        
+        insert_sql = """insert into annotations
+          (sid, center_point, cir_rect, anno_class, anno_code, type, 
+          color, is_typical, contours)
+          VALUES 
+          (%d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');
+          """ % (sid, anno['center_point'], anno['cir_rect'], anno['anno_class'], anno['anno_code'],
+                anno['type'], anno['color'], anno['is_typical'], anno['contours'])
+        try:
+            cursor.execute(insert_sql)
+            self._db.commit()
+        except:
+            print(data, 'handle error')
+            self._db.rollback()
     def insert_into_slide_hard(self, data):
         '''
-          Ïòslide_hard±íÖĞ²åÈëÊı¾İ
-          :param data: Êı¾İ×éÖ¯·½Ê½Îª×Öµä
+          ï¿½ï¿½slide_hardï¿½ï¿½ï¿½Ğ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+          :param data: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¯ï¿½ï¿½Ê½Îªï¿½Öµï¿½
           :return:
           '''
         # print(data)
@@ -128,9 +169,60 @@ class MySQLProxy:
 #                          INCOME FLOAT )'''
 # cursor.execute(create_table_sql)
 # db.close()
+import os
+import sys
+sys.path.append('../format_conversion')
+from xml_tools import *
+
+
+def concret_xml(xml_path):
+    
+    xmls = os.listdir(xml_path)
+    for xml in xmls:
+        current_path = os.path.join(xml_path, xml)
+        if xml.find('.xml') != -1:
+            print(current_path)
+            slide_info, annos, group_list = read_xml_slide_anno(current_path)
+            data = dict()
+            data['slide_path'] = slide_info.slide_path().replace('\\', '/')
+            data['slide_name'] = slide_info.slide_name()
+            data['slide_group'] = slide_info.slide_group()
+            data['pro_method'] = slide_info.pro_method()
+            data['image_method'] = slide_info.image_method()
+            data['mpp'] = slide_info.mpp()
+            data['zoom'] = slide_info.zoom()
+            data['slide_format'] = slide_info.slide_format()
+            data['is_positive'] = slide_info.is_positive()
+            data['width'] = slide_info.width()
+            data['height'] = slide_info.height()
+            data['bounds_x'] = slide_info.bounds_x()
+            data['bounds_y'] = slide_info.bounds_y()
+            for anno in annos:
+                anno_dict = dict()
+                anno_dict['center_point'] = anno.center_point()
+                anno_dict['cir_rect'] = anno.cir_rect()
+                anno_dict['anno_class'] = anno.anno_class()
+                anno_dict['anno_code'] = anno.anno_code()
+                anno_dict['type'] = anno.type()
+                anno_dict['color'] = anno.color()
+                anno_dict['is_typical'] = anno.is_typical()
+                contours = ''
+                for contour in anno.contours():
+                    contours += (str(contour[0]) + ',' + str(contour[1]) + ';')
+                anno_dict['contours'] = contours
+                # print(anno_dict)
+                sql_proxy.insert_into_annotations(data, anno_dict)
+        else:
+            concret_xml(current_path)
+
+def read_all_xml(xmls_path):
+    concret_xml(xmls_path)
+    
 
 # if __name__ == '__main__':
-#
+
 #     sql_proxy = MySQLProxy()
 #     sql_proxy.connect()
-#     sql_proxy.create_slide_hard()
+#     xmls_path = 'L:/GXB/unified_xml'
+#     read_all_xml(xmls_path)
+#     sql_proxy.close()

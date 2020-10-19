@@ -99,10 +99,21 @@ class SlideInfo:
     def height(self): return self._height
     def bounds_x(self): return self._bounds_x
     def bounds_y(self): return self._bounds_y
-    def modify_info(self): return self._modify_info.c_str()
+    def modify_info(self): 
+        if self._modify_info == None:
+            return ''
+        else:
+            return self._modify_info.c_str()
     def file_permission(self): return self._file_permission
     def md5_info(self): return self._md5_info
 
+
+    def show_info(self):
+        '''
+        显示切片信息
+        '''
+        for k in slide_pps.keys():
+            print(k, str(getattr(self, k)()))
 
     @staticmethod
     def map_to_SlideInfo(m):

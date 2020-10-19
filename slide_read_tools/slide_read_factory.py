@@ -1,3 +1,6 @@
+import sys
+sys.path.append('../')
+
 from slide_read_tools.mrxs import mrr
 from slide_read_tools.svs import svr
 from slide_read_tools.sdpc import sdr

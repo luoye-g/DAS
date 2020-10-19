@@ -79,7 +79,10 @@ class ModifyInfo:
 
 
 class F:
-    def __call__(self, x): return float(x)
+    def __call__(self, x): 
+        if x.find(';') != -1:
+            x = x.replace(';', '')
+        return float(x)
 
 
 class Mstr:
