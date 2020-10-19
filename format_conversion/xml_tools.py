@@ -6,6 +6,7 @@ from format_conversion.libs._xml_tools import __save_xml_by_annos__
 from format_conversion.libs._xml_tools import __read_xml_by_slide__
 from format_conversion.libs._xml_tools import __save_xml_slide_anno__
 from format_conversion.libs._xml_tools import __read_xml_slide_anno__
+from format_conversion.libs._xml_tools import __merge_anno__
 
 from format_conversion.csv_tools import read_csv_by_path
 
@@ -78,6 +79,15 @@ def read_xml_by_slide(xml_path, slide_path, slide_batch, pro_method, image_metho
     '''
     return __read_xml_by_slide__(xml_path, slide_path, slide_batch, pro_method, image_method, zoom, format_trans,
                                  is_positive, sub_class, is_hard)
+
+def merge_anno(annos1, annos2):
+    '''
+    合并两个annos代表的xml标注
+    :param annos1:
+    :param annos2:
+    :return:  返回合并完成的结果
+    '''
+    return __merge_anno__(annos1, annos2)
 
 '''
     函数测试

@@ -262,7 +262,41 @@ def __read_xml_slide_anno__(xml_path):
 
 def __merge_anno__(annos1, annos2):
     '''
+    合并两个annos代表的xml标注
+    :param annos1:
+    :param annos2:
+    :return:  返回合并完成的结果
     '''
+    merged_annos = list()
+    merged_dicts = dict()
+    merge_thre = 0.6
+    for k1, anno1 in enumerate(annos1):
+        for k2, anno2 in enumerate(annos2):
+            x1, y1, w1, h1 = anno1.cir_rect().split(',')
+            x1, y1, w1, h1 = float(x1), float(y1), float(w1), float(h1)
+            x2, y2, w2, h2 = anno2.cir_rect().split(',')
+            x2, y2, w2, h2 = float(x2), float(y2), float(w2), float(h2)
+            x = max(x1, x2)
+            y = max(y1, y2)
+            w = min(x1 + w1, x2 + w2) - x
+            h = min(y1 + h1, y2 + h2) - y
+            if w > 0 and h > 0:
+                r1 = w * h / (w1 * h1)
+                r2 = w * h / (w2 * h2)
+                if r1 > merge_thre and r2 > merge_thre:
+                    if w1 * h1 < w1 * h2:
+                        merged_dicts['1_' + str(k2)] = 1
+                    else:
+                        merged_dicts['2_' + str(k2)] = 1
+
+    for k1, anno1 in enumerate(annos1):
+        if ('1_' + str(k1)) not in merged_dicts.keys():
+            merged_annos.append(anno1)
+    for k2, anno2 in enumerate(annos2):
+        if ('2_' + str(k2)) not in merged_dicts.keys():
+            merged_annos.append(anno2)
+
+    return merged_annos
 
 if __name__ == '__main__':
     xml_path = 'H:/TCTDATA/3DHistech/Shengfuyou_1th/Labelfiles/XML/01.xml'
@@ -276,8 +310,19 @@ if __name__ == '__main__':
     # is_positive = 'Yes'
     # sub_class = None
     # is_hard = False``
-    slide_info, annos, _ = __read_xml_slide_anno__(xml_path)
+    # slide_info, annos, _ = __read_xml_slide_anno__(xml_path)
 
 
-    xml_path = 'D:/PSQ/69_L.xml'
-    __save_xml_slide_anno__(slide_info, annos, xml_path)
+    # xml_path = 'D:/PSQ/69_L.xml'
+    # __save_xml_slide_anno__(slide_info, annos, xml_path)
+
+    xml1_path = 'E:/desktop/fql_on/1111112 0893049-right.xml'
+    xml2_path = 'E:/desktop/fql_on/1111112 0893049-left.xml'
+    annos1, _ = __read_xml_by_path__(xml1_path)
+    annos2, _ = __read_xml_by_path__(xml2_path)
+    merged_annos = __merge_anno__(annos1, annos2)
+
+    merged_path = 'E:/desktop/fql_on/1111112 0893049-merge.xml'
+
+    __save_xml_by_annos__(merged_annos, merged_path)
+    print(len(annos1), len(annos2), len(merged_annos))
