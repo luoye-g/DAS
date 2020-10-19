@@ -259,6 +259,11 @@ def __read_xml_slide_anno__(xml_path):
 
     return slide_info, annos, group_list
 
+
+def __merge_anno__(annos1, annos2):
+    '''
+    '''
+
 if __name__ == '__main__':
     xml_path = 'H:/TCTDATA/3DHistech/Shengfuyou_1th/Labelfiles/XML/01.xml'
     slide_path = 'H:/TCTDATA/3DHistech/Shengfuyou_1th/Positive/01.mrxs'
