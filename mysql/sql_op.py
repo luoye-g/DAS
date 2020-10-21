@@ -5,6 +5,7 @@
 from mysql.sql_con import sql_proxy
 from beans.Slide import SlideInfo
 from beans.Anno import Annotation
+from beans.type_c import Point, Rect
 
 def query_sub_class(pro_method,
                     image_method,
@@ -75,15 +76,40 @@ def query_hard( pro_method,
 
 def query_annos(sid):
     '''
+    查询切片id = sid 的所有标注
     :param sid: 与该标注关联的sid
     :return:
     '''
-    sql = '''select * from annotations where sid = %s''' % sid
+    sql = '''select * from annotations where sid = %s;''' % sid
 
     annos = list()
+    sql_proxy.connect()
     results = sql_proxy.execute_query(sql)
+    sql_proxy.close()
     for res in results:
-        print(res)
+        center_point = Point.str_to_Point(res[2])
+        cir_rect = Rect.str_to_Rect(res[3])
+        anno_class = res[4]
+        anno_code = res[5]
+        type = res[6]
+        color = res[7]
+        is_typical = res[8]
+        contours = list()
+        uints = res[9].split(';')
+        for uint in uints:
+            if uint == '':
+                continue
+            us = uint.split(',')
+            contours.append([float(us[0]), float(us[1])])
+        has_contours = 'Yes'
+        if len(contours) <= 4:
+            has_contours = 'No'
+        is_hard = res[10]
+        
+        anno = Annotation(center_point, cir_rect, contours, anno_class, anno_code,
+                          type, has_contours, color, is_typical)
+        anno.set_is_hard(is_hard)
+        annos.append(anno)
 
     return annos
 
@@ -140,26 +166,28 @@ def query_slide_info(pro_method='%',
         zoom = slide[7]
         slide_format = slide[8]
         format_trans = slide[14]
-        is_positive = slide[[9]]
+        is_positive = slide[9]
         is_hard = query_hard(pro_method, image_method, slide_group, is_positive, slide_name)
         width = slide[10]
         height = slide[11]
-        sub_class = query_sub_class(pro_method, image_method, slide_group, is_positive, slide_name),
+        sub_class = query_sub_class(pro_method, image_method, slide_group, is_positive, slide_name)
         bounds_x = slide[12]
         bounds_y = slide[13]
-        modify_info = None,
-        file_permission = None,
+        modify_info = None
+        file_permission = None
         md5_info = None
 
         slide_info = SlideInfo(slide_path, slide_name, slide_group, pro_method, image_method, mpp,
                                zoom, slide_format, format_trans, is_positive, is_hard, width, height,
                                sub_class, bounds_x, bounds_y, modify_info, file_permission, md5_info)
         slide_info.set_sid(slide[0])
-        slide_info.show_info()
+        # slide_info.show_info()
         slides_list.append(slide_info)
 
     sql_proxy.close()
     return slides_list
 
 if __name__ == '__main__':
-    query_slide_info(slide_group='Shengfuyou_1th', slide_format='mrxs')
+    # query_slide_info(slide_group='Shengfuyou_1th', slide_format='mrxs')
+
+    query_annos(12)

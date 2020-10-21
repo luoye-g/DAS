@@ -68,6 +68,10 @@ class Annotation:
     def has_contours(self):
         return self._has_contours
 
+    def set_is_hard(self, is_hard):
+        self._is_hard = is_hard
+    def is_hard(self): return self._is_hard
+
     @staticmethod
     def map_to_Anno(m):
         '''

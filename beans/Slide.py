@@ -116,7 +116,10 @@ class SlideInfo:
         显示切片信息
         '''
         for k in slide_pps.keys():
-            print(k, str(getattr(self, k)()))
+            if getattr(self, '_' + k) is not None:
+                print(k, str(getattr(self, k)()))
+            else:
+                print(k, 'None')
 
     @staticmethod
     def map_to_SlideInfo(m):

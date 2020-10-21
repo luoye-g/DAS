@@ -211,7 +211,14 @@ def concret_xml(xml_path):
     for xml in xmls:
         current_path = os.path.join(xml_path, xml)
         if xml.find('.xml') != -1:
+            uints = current_path.split('\\')
+            key = uints[1] + ',' + uints[2] + ',' + uints[3]
+            if key in xml_map.keys():
+                xml_map[key] += 1
+            else:
+                xml_map[key] = 0
             print(current_path)
+            continue
             slide_info, annos, _ = read_xml_slide_anno(current_path)
             data = dict()
             data['slide_path'] = slide_info.slide_path().replace('\\', '/')
@@ -244,17 +251,26 @@ def concret_xml(xml_path):
                     contours += (str(contour[0]) + ',' + str(contour[1]) + ';')
                 anno_dict['contours'] = contours
                 # print(anno_dict)
-                sql_proxy.insert_into_annotations(data, anno_dict)
+                # sql_proxy.insert_into_annotations(data, anno_dict)
         else:
             concret_xml(current_path)
 
 def read_all_xml(xmls_path):
     concret_xml(xmls_path)
+    total = 0
+    print('%-15s%-20s%-15s%s' % ('method', 'group', 'is_pos', 'num'))
+    for key in xml_map.keys():
+        uints = key.split(',')
+        print('%-15s%-20s%-15s%d' % (uints[0], uints[1], uints[2], xml_map[key]))
+        total += xml_map[key]
+        # print(key, xml_map[key])
+    print('total xml count: %d' % total)
     
 sql_proxy = MySQLProxy()
-# if __name__ == '__main__':
+xml_map = dict()
+if __name__ == '__main__':
 
-#     sql_proxy = MySQLProxy()
-#     sql_proxy.connect()
-#     read_all_xml('L:/GXB/unified_xml')
-#     sql_proxy.close()
+    # sql_proxy = MySQLProxy()
+    # sql_proxy.connect()
+    read_all_xml('L:/GXB/unified_xml')
+    # sql_proxy.close()
