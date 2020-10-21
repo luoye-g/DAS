@@ -17,9 +17,16 @@ class MySQLProxy:
     def connect(self):
         self._db = MySQLdb.connect(host=HOST, user=USER, password=PASSWORD, db=DB, charset=CHARSET)
 
-    
-    def query(self, query_sql):
-        pass
+    def excute_query(self, sql):
+        try:
+            cursor = self._db.cursor()
+            results = cursor.execute(sql)
+            return results
+        except:
+            print(sql, ' excute failed ... ')
+            self._db.rollback()
+            return None
+
 
     def close(self):
         if self._db is not None:
@@ -241,13 +248,14 @@ def concret_xml(xml_path):
         else:
             concret_xml(current_path)
 
-def read_all_xml(xmls_path):
-    concret_xml(xmls_path)
-    
-
-if __name__ == '__main__':
-
-    sql_proxy = MySQLProxy()
-    sql_proxy.connect()
-    read_all_xml('L:/GXB/unified_xml')
-    sql_proxy.close()
+sql_proxy = MySQLProxy()
+# def read_all_xml(xmls_path):
+#     concret_xml(xmls_path)
+#
+#
+# if __name__ == '__main__':
+#
+#     sql_proxy = MySQLProxy()
+#     sql_proxy.connect()
+#     read_all_xml('L:/GXB/unified_xml')
+#     sql_proxy.close()
