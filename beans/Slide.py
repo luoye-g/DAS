@@ -108,6 +108,9 @@ class SlideInfo:
     def md5_info(self): return self._md5_info
 
 
+    def set_sid(self, sid): self._sid = sid
+    def sid(self): return self._sid
+
     def show_info(self):
         '''
         显示切片信息
