@@ -18,6 +18,7 @@
     'nn'            0811
     'pp'            0812
     'Neg'           0813
+    'pos_jp'        0814
 '''
 class cc:
     code_to_class = {
@@ -65,6 +66,7 @@ class cc:
         '0811': 'nn',
         '0812': 'pp',
         '0813': 'Neg',
+        '0814': 'pos_jp',
         '1300': 'Endometrium',
     }
 
@@ -149,6 +151,7 @@ class cc:
         'deleted_0.0':  '0806',
         'deleted_0.100':'0807',
         'pos':          '0809',
+        'pos_jp':       '0814',
         'mould':        '0810',
         'trichomonad':  '1210',
         'nn':           '0811',

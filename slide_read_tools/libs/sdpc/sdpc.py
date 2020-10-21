@@ -36,7 +36,7 @@ class Sdpc(object):
         self.__dll.openSdpc.restype = ctypes.c_ulonglong
         self.__dll.closeSdpc.argtypes = [ctypes.c_ulonglong]
         self.__dll.getSdpcInfo.argtypes = [ctypes.c_ulonglong, ctypes.c_void_p]
-        self.__dll.getTile.argtypes = [ctypes.c_ulonglong,  #
+        self.__dll.getTile.argtypes = [ctypes.c_ulonglong, 
                                        ctypes.c_int32, ctypes.c_int32, ctypes.c_int32,  #
                                        ctypes.c_int32, ctypes.c_int32,  #
                                        ctypes.c_char_p]

@@ -42,6 +42,8 @@ def __read_xml_by_path__(xml_path):
             l, r, t, d = np.min(array_contours[:, 0]), np.max(array_contours[:, 0]), \
                          np.min(array_contours[:, 1]), np.max(array_contours[:, 1])
             bounding_rect = Rect(l, t, r - l, d - t)
+            # if 500 >= int(anno_class) >= 1:
+            #     anno_class = 'pos'
             anno = Annotation(center_point, bounding_rect, contours, anno_class,
                               cc.class_to_code[anno_class], type, has_contours, color, 'No')
             annos.append(anno)
@@ -318,11 +320,11 @@ if __name__ == '__main__':
 
     xml1_path = 'E:/desktop/fql_on/1111112 0893049-right.xml'
     xml2_path = 'E:/desktop/fql_on/1111112 0893049-left.xml'
-    annos1, _ = __read_xml_by_path__(xml1_path)
-    annos2, _ = __read_xml_by_path__(xml2_path)
-    merged_annos = __merge_anno__(annos1, annos2)
+    # annos1, _ = __read_xml_by_path__(xml1_path)
+    # annos2, _ = __read_xml_by_path__(xml2_path)
+    # merged_annos = __merge_anno__(annos1, annos2)
 
-    merged_path = 'E:/desktop/fql_on/1111112 0893049-merge.xml'
+    # merged_path = 'E:/desktop/fql_on/1111112 0893049-merge.xml'
 
-    __save_xml_by_annos__(merged_annos, merged_path)
-    print(len(annos1), len(annos2), len(merged_annos))
+    # __save_xml_by_annos__(merged_annos, merged_path)
+    # print(len(annos1), len(annos2), len(merged_annos))

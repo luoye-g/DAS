@@ -15,7 +15,12 @@ class SvsProxy:
         self._proporties = self._ors.properties
         # print(self._proporties)
 
-    def mpp(self): return self._mppx()
+    def mpp(self):
+        mpp = self._mppx()
+        if mpp.find(';') != -1:
+            mpp = mpp[: mpp.find(';')]
+        return mpp
+        
     def _mppx(self): return self._proporties['aperio.MPP']
     def _mppy(self): return self._proporties['aperio.MPP']
     def boundsx(self): 

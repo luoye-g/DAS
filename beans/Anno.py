@@ -44,6 +44,9 @@ class Annotation:
     def cir_rect(self):
         return self._cir_rect.c_str()
 
+    def cir_rect_class(self):
+        return self._cir_rect
+
     def anno_code(self):
         return self._anno_code
 

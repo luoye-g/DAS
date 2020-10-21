@@ -1,3 +1,5 @@
+# coding: utf-8
+
 class Group(object):
     def __init__(self, color, name, part_of_group):
         '''
@@ -40,6 +42,11 @@ class Rect:
         self._y = y
         self._w = w
         self._h = h
+
+    def x(self): return int(self._x)
+    def y(self): return int(self._y)
+    def w(self): return int(self._w)
+    def h(self): return int(self._h)
 
     def c_str(self): return str(self._x) + ',' + str(self._y) + ',' + str(self._w) + ',' + str(self._h)
 

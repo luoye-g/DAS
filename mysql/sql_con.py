@@ -17,9 +17,30 @@ class MySQLProxy:
     def connect(self):
         self._db = MySQLdb.connect(host=HOST, user=USER, password=PASSWORD, db=DB, charset=CHARSET)
 
+    
+    def query(self, query_sql):
+        pass
+
     def close(self):
         if self._db is not None:
             self._db.close()
+
+    
+    def insert_into_class_code(self, data):
+        sql = '''
+                insert into class_code 
+                (code, class, anno)
+                values
+                ('%s', '%s', '%s')
+        '''\
+        % (data['code'], data['class'], data['anno'])
+        cursor = self._db.cursor()
+        # try:
+        cursor.execute(sql)
+        self._db.commit()
+        # except:
+        #     print('insert into class_code error')
+        #     self._db.rollback()
 
     def insert_into_slide_sub_class(self, data):
         '''
@@ -97,12 +118,13 @@ class MySQLProxy:
     def insert_into_slides(self, slide):
         sql = """insert into slides
           (slide_path, slide_name, slide_group, pro_method, image_method, mpp, zoom, 
-          slide_format, is_positive, width, height, bounds_x, bounds_y)
+          slide_format, is_positive, width, height, bounds_x, bounds_y, format_trans)
           VALUES 
-          ('%s', '%s', '%s', '%s', '%s', %s, '%s', '%s', '%s', %s, %s, %s, %s);
+          ('%s', '%s', '%s', '%s', '%s', %s, '%s', '%s', '%s', %s, %s, %s, %s, '%s');
           """ % (slide.slide_path(), slide.slide_name(), slide.slide_group(), slide.pro_method(),
                  slide.image_method(), slide.mpp(), slide.zoom(), slide.slide_format(),
-                 slide.is_positive(), slide.width(), slide.height(), slide.bounds_x(), slide.bounds_y())
+                 slide.is_positive(), slide.width(), slide.height(), slide.bounds_x(), slide.bounds_y(), 
+                 slide.format_trans())
         try:
             cursor = self._db.cursor()
             cursor.execute(sql)
@@ -123,17 +145,20 @@ class MySQLProxy:
             sid = row[0]
         
         insert_sql = """insert into annotations
-          (sid, center_point, cir_rect, anno_class, anno_code, type, 
-          color, is_typical, contours)
-          VALUES 
-          (%d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');
-          """ % (sid, anno['center_point'], anno['cir_rect'], anno['anno_class'], anno['anno_code'],
-                anno['type'], anno['color'], anno['is_typical'], anno['contours'])
+          (sid, center_point, cir_rect, anno_class, anno_code, type, \
+            color, is_typical, contours, is_hard) \
+            VALUES \
+            (%d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');""" % \
+          (sid, anno['center_point'], anno['cir_rect'], anno['anno_class'], anno['anno_code'],
+                anno['type'], anno['color'], anno['is_typical'], anno['contours'], anno['is_hard'])
         try:
             cursor.execute(insert_sql)
             self._db.commit()
         except:
-            print(data, 'handle error')
+            if len(anno['contours']) > 10000:
+                print('contours too long')
+            else:
+                print('data duplicate ....')
             self._db.rollback()
     def insert_into_slide_hard(self, data):
         '''
@@ -170,9 +195,7 @@ class MySQLProxy:
 # cursor.execute(create_table_sql)
 # db.close()
 import os
-import sys
-sys.path.append('../format_conversion')
-from xml_tools import *
+from format_conversion.xml_tools import *
 
 
 def concret_xml(xml_path):
@@ -182,7 +205,7 @@ def concret_xml(xml_path):
         current_path = os.path.join(xml_path, xml)
         if xml.find('.xml') != -1:
             print(current_path)
-            slide_info, annos, group_list = read_xml_slide_anno(current_path)
+            slide_info, annos, _ = read_xml_slide_anno(current_path)
             data = dict()
             data['slide_path'] = slide_info.slide_path().replace('\\', '/')
             data['slide_name'] = slide_info.slide_name()
@@ -206,6 +229,9 @@ def concret_xml(xml_path):
                 anno_dict['type'] = anno.type()
                 anno_dict['color'] = anno.color()
                 anno_dict['is_typical'] = anno.is_typical()
+                anno_dict['is_hard'] = 'No'
+                if current_path.find('hard') != -1:
+                    anno_dict['is_hard'] = 'Yes'
                 contours = ''
                 for contour in anno.contours():
                     contours += (str(contour[0]) + ',' + str(contour[1]) + ';')
@@ -219,10 +245,9 @@ def read_all_xml(xmls_path):
     concret_xml(xmls_path)
     
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
 
-#     sql_proxy = MySQLProxy()
-#     sql_proxy.connect()
-#     xmls_path = 'L:/GXB/unified_xml'
-#     read_all_xml(xmls_path)
-#     sql_proxy.close()
+    sql_proxy = MySQLProxy()
+    sql_proxy.connect()
+    read_all_xml('L:/GXB/unified_xml')
+    sql_proxy.close()

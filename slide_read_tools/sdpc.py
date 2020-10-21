@@ -1,7 +1,6 @@
-
-# from libs.sdpc.sdpc import Sdpc
+# coding: utf-8
 from slide_read_tools.libs.sdpc.sdpc import Sdpc
-
+import numpy as np
 
 class SdpcProxy:
 
@@ -30,6 +29,22 @@ class SdpcProxy:
     def boundsy(self): return 0
     def width(self): return self._proporties['width']
     def height(self): return self._proporties['height']
+
+    def read_region(self, x, y, w, h, level=0):
+        '''
+        :param x: 
+        :param y:
+        :param w:
+        :param h:
+        :param level:
+        '''
+        img = self._ors.getTile(level, y, x, w, h)
+        assert img != None
+        img = np.ctypeslib.as_array(img)
+        img.dtype = np.uint8
+        img = img.reshape((w, h, 3))
+        img = np.array(img)
+        return img
 
     def close(self):
         if self._ors is not None:
