@@ -41,7 +41,7 @@ def query_slide_info(pro_method='%',
         zoom
     )
 
-    slides = sql_proxy.excute_query(sql)
+    slides = sql_proxy.execute_query(sql)
     print(len(slides))
 
     sql_proxy.close()
