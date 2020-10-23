@@ -1,4 +1,5 @@
 import openslide
+import numpy as np
 
 class MrxsProxy:
 
@@ -22,6 +23,12 @@ class MrxsProxy:
     def width(self): return self._proporties['openslide.bounds-width']
     def height(self): return self._proporties['openslide.bounds-height']
 
+    def read_region(self, x, y, w, h, level=0):
+        img = self._ors.read_region((x, y), level, (w, h))
+        img = np.array(img)
+        img = img[:, :, 0: 3]
+        img = img[:, :, ::-1]
+        return img
 
     def close(self):
         if self._ors is not None:

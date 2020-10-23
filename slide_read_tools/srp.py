@@ -17,6 +17,21 @@ class SrpProxy:
         self._proporties = self._ors.getAttrs()
         # print(self._proporties)
 
+    def read_region(self, x, y, w, h, level=0):
+        '''
+        :param x: 
+        :param y:
+        :param w:
+        :param h:
+        :param level:
+        '''
+        img = self._ors.ReadRegionRGB(self, level, x, y, w, h):
+        img = np.ctypeslib.as_array(img)
+        img.dtype = np.uint8
+        img = img.reshape((w, h, 3))
+        img = np.uint8(img)
+        return img
+
     def mpp(self): return self._mppx()
     def _mppx(self): return self._proporties['mpp']
     def _mppy(self): return self._proporties['mpp']
