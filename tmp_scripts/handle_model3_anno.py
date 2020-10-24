@@ -74,8 +74,12 @@ def if_intersection(x1, y1, w1, h1,
     w = min(x1 + w1, x2 + w2) - x
     h = min(y1 + h1, y2 + h2) - y
     if w <= 0 or h <= 0:
-        return False
-    return True
+        return False, 0
+    
+    # cal IOU
+    iou = (w * h) / (w1 * h1 + w2 * h2 - w * h)
+
+    return True, iou
 
 def read_model3_txt(txt_path):
     coors = list()
@@ -103,7 +107,7 @@ def merge_model3_anno(txts_list, anno_list):
         del_flag = False
         for anno in anno_list:
             if if_intersection(txt[0], txt[1], txt[2], txt[3], 
-                               anno[0], anno[1], anno[2], anno[3]):
+                               anno[0], anno[1], anno[2], anno[3])[0]:
                 del_flag = True
         if not del_flag:
             new_txts_list.append(txt)
@@ -143,11 +147,35 @@ def merge_model3_and_mysql_anno(annos, sql_annos):
     :param annos:
     :param sql_annos:
     '''
-    for k, anno in enumerate(annos):
-        for sql_anno in sql_annos:
-            
-            pass
+    new_annos = list()
+    for anno in annos:
+        # print(anno)
+        del_flag = False
+        for k, sql_anno in enumerate(sql_annos):
+            if_inter, iou = if_intersection(anno[0], anno[1], anno[2], anno[3], \
+            sql_anno.cir_rect_class().x(), \
+            sql_anno.cir_rect_class().y(), \
+            sql_anno.cir_rect_class().w(), \
+            sql_anno.cir_rect_class().h())
+            if if_inter and iou > 0.1:
+                # print(anno, sql_anno.cir_rect(), sql_anno.anno_class(), sql_anno.has_contours(), iou)
+                del_flag = True
+                if anno[4].find('typical') == 0:
+                    sql_annos[k].set_is_typical('Yes')
+        if not del_flag:
+            new_annos.append(anno)
+    return new_annos, sql_annos
+
+def update_anno_tables(new_annos, sql_annos):
+    '''
+    :param new_annos:
+    :param sql_annos:
+    return
+    '''
+    
     pass
+    
+
 
 from format_conversion.xml_tools import read_xml_by_path
 xml_path = 'O:/TransSrp/SZSQ_originaldata/Model3Labelfiles/xml'
@@ -221,7 +249,9 @@ for k, xml_item in enumerate(xml_items):
         print(len(sql_annos))
 
         # merge model3 anno and origin mysql anno
-        
-        # break
+        new_annos, sql_annos = merge_model3_and_mysql_anno(annos, sql_annos)
+        # update database
+        update_anno_tables(new_annos, sql_annos)
+        break
 
     break

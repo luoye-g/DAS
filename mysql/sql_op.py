@@ -78,6 +78,23 @@ def query_all_annos():
     return id_list
 
 
+def insert_annotations(annos):
+    '''
+    :params annos: 
+    return None
+    '''
+    sql = '''
+            insert into annotations (sid, center_point, cir_rect, anno_class, 
+            anno_code, type, color, is_typical, contours, is_hard, has_contours) values 
+            (%s, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')
+    '''
+    sql_proxy.connect()
+    for anno in annos:
+        sql_proxy.exceute_update(sql % (anno.sid(), anno.center_point(), anno.cir_rect(), 
+        anno.anno_class(), anno.anno_code(), anno.type(), anno.color(), anno.is_typical(), 
+        anno.contours_text(), anno.is_hard(), anno.has_contours()))
+    sql_proxy.close()
+
 def update_annotations(id_list, type, has_contours):
     '''
     更新is_list集合中的type与has_contours字段
@@ -125,6 +142,8 @@ def query_annos(sid):
         anno = Annotation(center_point, cir_rect, contours, anno_class, anno_code,
                           type, has_contours, color, is_typical)
         anno.set_is_hard(is_hard)
+        anno.set_aid(res[0])
+        anno.set_sid(res[1])
         annos.append(anno)
 
     return annos

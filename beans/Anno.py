@@ -53,11 +53,20 @@ class Annotation:
     def is_typical(self):
         return self._is_typical
 
+    def set_is_typical(self, is_typical):
+        self._is_typical = is_typical
+
     def anno_class(self):
         return self._anno_class
 
     def contours(self):
         return self._contours
+    
+    def contours_text(self):
+        text = str()
+        for contour in self._contours:
+            text += str(contour[0]) + ',' + str(contour[1]) + ';'
+        return text
 
     def type(self):
         return self._type
@@ -71,6 +80,12 @@ class Annotation:
     def set_is_hard(self, is_hard):
         self._is_hard = is_hard
     def is_hard(self): return self._is_hard
+
+    def set_aid(self, aid): self._aid = aid
+    def aid(self,): return self._aid
+
+    def set_sid(self, sid): self._sid = sid
+    def sid(self,): return self._sid
 
     @staticmethod
     def map_to_Anno(m):
