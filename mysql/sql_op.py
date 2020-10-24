@@ -40,11 +40,7 @@ def query_sub_class(pro_method,
         sub_class = results[0][0]
     return sub_class
 
-def query_hard( pro_method,
-                image_method,
-                slide_group,
-                is_positive,
-                slide_name):
+def query_hard(sid):
     '''
     :param pro_method:
     :param image_method:
@@ -55,24 +51,46 @@ def query_hard( pro_method,
     '''
     is_hard = 'No'
     sql = '''select * from slide_hard
-        where 
-        pro_method      like '%s' and
-        image_method    like '%s' and
-        slide_group     like '%s' and
-        is_positive     like '%s' and
-        slide_name      like '%s'; ''' % \
+        where sid = %d; ''' % \
     (
-        pro_method,
-        image_method,
-        slide_group,
-        is_positive,
-        slide_name,
+        sid
     )
     results = sql_proxy.execute_query(sql)
     if len(results) > 0:
         is_hard = 'Yes'
     return is_hard
 
+def query_all_annos():
+    '''
+    查询所有标注
+    :return: 返回特定条件下查询标注的id集合
+    '''
+    sql = 'select * from annotations'
+
+    sql_proxy.connect()
+    results = sql_proxy.execute_query(sql)
+    sql_proxy.close()
+    id_list = list()
+    for res in results:
+        uints = res[9].split(';')
+        if len(uints) <= 5:
+            id_list.append(res[0])
+    return id_list
+
+
+def update_annotations(id_list, type, has_contours):
+    '''
+    更新is_list集合中的type与has_contours字段
+    :param type:    轮廓类型字段
+    :has_contours:  是否有具体轮廓
+    '''
+    sql_proxy.connect()
+    for id in id_list:
+        sql = 'update annotations set type=\'%s\', has_contours=\'%s\' where aid=%s;' % \
+                (type, has_contours, id)
+        print(sql)
+        sql_proxy.exceute_update(sql)
+    sql_proxy.close()
 
 def query_annos(sid):
     '''
@@ -101,10 +119,8 @@ def query_annos(sid):
                 continue
             us = uint.split(',')
             contours.append([float(us[0]), float(us[1])])
-        has_contours = 'Yes'
-        if len(contours) <= 4:
-            has_contours = 'No'
         is_hard = res[10]
+        has_contours = res[11]
         
         anno = Annotation(center_point, cir_rect, contours, anno_class, anno_code,
                           type, has_contours, color, is_typical)
@@ -167,7 +183,7 @@ def query_slide_info(pro_method='%',
         slide_format = slide[8]
         format_trans = slide[14]
         is_positive = slide[9]
-        is_hard = query_hard(pro_method, image_method, slide_group, is_positive, slide_name)
+        is_hard = query_hard(slide[0])
         width = slide[10]
         height = slide[11]
         sub_class = query_sub_class(pro_method, image_method, slide_group, is_positive, slide_name)
@@ -190,4 +206,6 @@ def query_slide_info(pro_method='%',
 if __name__ == '__main__':
     # query_slide_info(slide_group='Shengfuyou_1th', slide_format='mrxs')
 
-    query_annos(12)
+    id_list = query_all_annos()
+    print(len(id_list))
+    update_annotations(id_list, 'Rectangle', 'No')

@@ -19,6 +19,9 @@
     'pp'            0812
     'Neg'           0813
     'pos_jp'        0814
+    model3:
+    'typical_pos'   0900
+    'nplus'         0902
 '''
 class cc:
     code_to_class = {
@@ -68,6 +71,8 @@ class cc:
         '0813': 'Neg',
         '0814': 'pos_jp',
         '1300': 'Endometrium',
+        '0900': 'typical_pos',
+        '0902': 'nplus',
     }
 
     class_to_code = {
@@ -158,6 +163,8 @@ class cc:
         'pp':           '0812',
         'Neg':          '0813',
         'Endometrium':  '1300',  # 子宫内膜细胞
+        'typical_pos':  '0900',
+        'nplus':        '0902',
     }
 
     type_name = ["HSIL", "LSIL", "ASC-US", "AGC", "nGEC", "HCG", "SSC", "Candidate"]  # , "Normal"] #normal 不需要展示

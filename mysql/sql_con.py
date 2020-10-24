@@ -17,6 +17,17 @@ class MySQLProxy:
     def connect(self):
         self._db = MySQLdb.connect(host=HOST, user=USER, password=PASSWORD, db=DB, charset=CHARSET)
 
+
+    def exceute_update(self, sql):
+        try:
+            cursor = self._db.cursor()
+            cursor.execute(sql)
+            self._db.commit()
+        except:
+            print(sql, ' excute failed ... ')
+            self._db.rollback()
+
+
     def execute_query(self, sql):
         try:
             cursor = self._db.cursor()

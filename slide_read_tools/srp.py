@@ -1,7 +1,7 @@
 
 # from libs.sdpc.sdpc import Sdpc
 from slide_read_tools.libs.srp.pysrp import Srp
-
+import numpy as np
 
 class SrpProxy:
 
@@ -25,7 +25,7 @@ class SrpProxy:
         :param h:
         :param level:
         '''
-        img = self._ors.ReadRegionRGB(self, level, x, y, w, h):
+        img = self._ors.ReadRegionRGB(level, x, y, w, h)
         img = np.ctypeslib.as_array(img)
         img.dtype = np.uint8
         img = img.reshape((w, h, 3))
