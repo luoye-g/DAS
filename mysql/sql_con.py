@@ -19,13 +19,13 @@ class MySQLProxy:
 
 
     def exceute_update(self, sql):
-        try:
-            cursor = self._db.cursor()
-            cursor.execute(sql)
-            self._db.commit()
-        except:
-            print(sql, ' excute failed ... ')
-            self._db.rollback()
+        # try:
+        cursor = self._db.cursor()
+        cursor.execute(sql)
+        self._db.commit()
+        # except:
+        #     print(sql, ' excute failed ... ')
+        #     self._db.rollback()
 
 
     def execute_query(self, sql):
@@ -152,8 +152,10 @@ class MySQLProxy:
             print('data duplicate ..... ')
 
     def insert_into_annotations(self, data, anno):
-        query_sql = 'select sid from slides where slide_path = \'%s\' and slide_name = \'%s\'' \
-        % (data['slide_path'], data['slide_name'])
+        query_sql = '''select sid from slides where slide_name = '%s' and slide_group='%s'
+        and pro_method='%s' and image_method='%s' and zoom = '%s' and is_positive='%s';''' \
+        % (data['slide_name'], data['slide_group'], data['pro_method'], data['image_method'], 
+        data['zoom'], data['is_positive'])
         cursor = self._db.cursor()
         cursor.execute(query_sql)
         # 获取所有记录列表
@@ -161,7 +163,7 @@ class MySQLProxy:
         sid = 0
         for row in results:
             sid = row[0]
-        
+        assert sid != 0
         insert_sql = """insert into annotations
           (sid, center_point, cir_rect, anno_class, anno_code, type, \
             color, is_typical, contours, is_hard) \
@@ -169,15 +171,15 @@ class MySQLProxy:
             (%d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');""" % \
           (sid, anno['center_point'], anno['cir_rect'], anno['anno_class'], anno['anno_code'],
                 anno['type'], anno['color'], anno['is_typical'], anno['contours'], anno['is_hard'])
+        if len(anno['contours']) > 15000:
+            print('insert data toot long ....')
         try:
             cursor.execute(insert_sql)
             self._db.commit()
         except:
-            if len(anno['contours']) > 10000:
-                print('contours too long')
-            else:
-                print('data duplicate ....')
+            print('data duplicate ....')
             self._db.rollback()
+
     def insert_into_slide_hard(self, data):
         '''
           ��slide_hard���в�������
@@ -222,14 +224,16 @@ def concret_xml(xml_path):
     for xml in xmls:
         current_path = os.path.join(xml_path, xml)
         if xml.find('.xml') != -1:
-            uints = current_path.split('\\')
-            key = uints[1] + ',' + uints[2] + ',' + uints[3]
-            if key in xml_map.keys():
-                xml_map[key] += 1
-            else:
-                xml_map[key] = 0
+            # uints = current_path.split('\\')
+            # key = uints[1] + ',' + uints[2] + ',' + uints[3]
+            # if key in xml_map.keys():
+            #     xml_map[key] += 1
+            # else:
+            #     xml_map[key] = 0
+            # if current_path.find('1180000') == -1:
+            #     continue
             print(current_path)
-            continue
+            # continue
             slide_info, annos, _ = read_xml_slide_anno(current_path)
             data = dict()
             data['slide_path'] = slide_info.slide_path().replace('\\', '/')
@@ -262,26 +266,26 @@ def concret_xml(xml_path):
                     contours += (str(contour[0]) + ',' + str(contour[1]) + ';')
                 anno_dict['contours'] = contours
                 # print(anno_dict)
-                # sql_proxy.insert_into_annotations(data, anno_dict)
+                sql_proxy.insert_into_annotations(data, anno_dict)
         else:
             concret_xml(current_path)
 
 def read_all_xml(xmls_path):
     concret_xml(xmls_path)
-    total = 0
-    print('%-15s%-20s%-15s%s' % ('method', 'group', 'is_pos', 'num'))
-    for key in xml_map.keys():
-        uints = key.split(',')
-        print('%-15s%-20s%-15s%d' % (uints[0], uints[1], uints[2], xml_map[key]))
-        total += xml_map[key]
-        # print(key, xml_map[key])
-    print('total xml count: %d' % total)
+    # total = 0
+    # print('%-15s%-20s%-15s%s' % ('method', 'group', 'is_pos', 'num'))
+    # for key in xml_map.keys():
+    #     uints = key.split(',')
+    #     print('%-15s%-20s%-15s%d' % (uints[0], uints[1], uints[2], xml_map[key]))
+    #     total += xml_map[key]
+    #     # print(key, xml_map[key])
+    # print('total xml count: %d' % total)
     
 sql_proxy = MySQLProxy()
 xml_map = dict()
 if __name__ == '__main__':
 
     # sql_proxy = MySQLProxy()
-    # sql_proxy.connect()
-    read_all_xml('L:/GXB/unified_xml')
-    # sql_proxy.close()
+    sql_proxy.connect()
+    read_all_xml('L:/GXB/unified_xml/SZSQ/Tongji_5th/Positive')
+    sql_proxy.close()

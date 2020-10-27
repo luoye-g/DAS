@@ -83,16 +83,29 @@ def insert_annotations(annos):
     :params annos: 
     return None
     '''
-    sql = '''
-            insert into annotations (sid, center_point, cir_rect, anno_class, 
-            anno_code, type, color, is_typical, contours, is_hard, has_contours) values 
-            (%s, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')
-    '''
+    sql = '''insert into annotations (sid, center_point, cir_rect, anno_class, \
+        anno_code, type, color, is_typical, contours, is_hard, has_contours) values \
+            (%s, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s');'''
     sql_proxy.connect()
     for anno in annos:
+        # print(sql % (anno.sid(), anno.center_point(), anno.cir_rect(), 
+        # anno.anno_class(), anno.anno_code(), anno.type(), anno.color(), anno.is_typical(), 
+        # anno.contours_text(), anno.is_hard(), anno.has_contours()))
         sql_proxy.exceute_update(sql % (anno.sid(), anno.center_point(), anno.cir_rect(), 
         anno.anno_class(), anno.anno_code(), anno.type(), anno.color(), anno.is_typical(), 
         anno.contours_text(), anno.is_hard(), anno.has_contours()))
+    sql_proxy.close()
+
+def update_annotations_is_typical(aid, sid, is_typical):
+    '''
+    :param aid:
+    :param sid:
+    :param is_typical:
+    return 
+    '''
+    sql_proxy.connect()
+    sql = 'update annotations set is_typical=\'%s\' where aid=%s and sid=%s;' % (is_typical, aid, sid)
+    sql_proxy.exceute_update(sql)
     sql_proxy.close()
 
 def update_annotations(id_list, type, has_contours):
