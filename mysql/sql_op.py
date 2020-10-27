@@ -96,6 +96,17 @@ def insert_annotations(annos):
         anno.contours_text(), anno.is_hard(), anno.has_contours()))
     sql_proxy.close()
 
+
+def insert_anno_detection(aid, detection_box):
+    '''
+    :param aid: 
+    :param detection_box:   
+    '''
+    sql_proxy.connect()
+    sql = 'insert into anno_detection (aid, detection_box) values (%s, \'%s\');' % (aid, detection_box)
+    sql_proxy.exceute_update(sql)
+    sql_proxy.close()
+
 def update_annotations_is_typical(aid, sid, is_typical):
     '''
     :param aid:

@@ -170,3 +170,6 @@ class cc:
     type_name = ["HSIL", "LSIL", "ASC-US", "AGC", "nGEC", "HCG", "SSC", "Candidate"]  # , "Normal"] #normal 不需要展示
     color_value = ["#ff0000", "#00ff00", "#ffff00", "#007882", "#0000ff", "#8c9664", "#8c28c8",
                   "#0a0a0a"]  # , "#00ffff"]
+
+    zoom_dict = {'3DHistech': '20x', 'WNLO': '20x', 'SZSQ': '40x'}
+    format_dict = {'3DHistech': 'mrxs', 'WNLO': 'svs', 'SZSQ': 'sdpc'}

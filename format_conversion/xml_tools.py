@@ -6,9 +6,19 @@ from format_conversion.libs._xml_tools import __save_xml_by_annos__
 from format_conversion.libs._xml_tools import __read_xml_by_slide__
 from format_conversion.libs._xml_tools import __save_xml_slide_anno__
 from format_conversion.libs._xml_tools import __read_xml_slide_anno__
+from format_conversion.libs._xml_tools import __read_detection_xml__
 from format_conversion.libs._xml_tools import __merge_anno__
 
 from format_conversion.csv_tools import read_csv_by_path
+
+
+def read_detection_xml(xml_path):
+    '''
+    读取检测标注
+    :param xml_path: 
+    return annos, _
+    '''
+    return __read_detection_xml__(xml_path)
 
 def read_xml_by_path(xml_path):
     '''

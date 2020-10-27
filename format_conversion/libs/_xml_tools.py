@@ -9,6 +9,47 @@ from slide_read_tools.slide_read_factory import srf
 from mexception import SlideError
 from format_conversion.check_agl import mmd5
 
+
+
+def __read_detection_xml__(xml_path):
+    '''
+    :param xml_path: 
+    return 
+    '''
+    with open(xml_path, 'r', encoding='utf-8') as xml_file:
+        dom = minidom.parse(xml_file)  # 通过parse获取解析对象
+        root = dom.documentElement  # 进行根节点的获取
+        annotations = root.getElementsByTagName('object')  # get objects
+
+        annos = list()
+        for annotation in annotations:
+            anno_class = annotation.getElementsByTagName('name')[0]
+            anno_class = anno_class.firstChild.data
+            xmin = float(annotation.getElementsByTagName('xmin')[0].firstChild.data)
+            xmax = float(annotation.getElementsByTagName('xmax')[0].firstChild.data)
+            ymin = float(annotation.getElementsByTagName('ymin')[0].firstChild.data)
+            ymax = float(annotation.getElementsByTagName('ymax')[0].firstChild.data)
+            has_contours = 'No'
+            color = 'NULL'
+            is_typical = 'No'
+            contours  = list()
+            contours.append([xmin, ymin])
+            contours.append([xmax, ymin])
+            contours.append([xmax, ymax])
+            contours.append([xmin, ymax])
+            array_contours = np.array(contours)
+            center_point = Point(np.mean(array_contours[:, 0]), np.mean(array_contours[:, 1]))
+            l, r, t, d = np.min(array_contours[:, 0]), np.max(array_contours[:, 0]), \
+                         np.min(array_contours[:, 1]), np.max(array_contours[:, 1])
+            bounding_rect = Rect(l, t, r - l, d - t)
+
+            anno = Annotation(center_point, bounding_rect, contours, anno_class,
+                              cc.class_to_code[anno_class], type, has_contours, color, is_typical)
+            anno.set_is_hard('No')
+            annos.append(anno)
+
+    return annos, None
+
 def __read_xml_by_path__(xml_path):
     # 建立列表进行数据的临时存储
     with open(xml_path, 'r', encoding='utf-8') as xml_file:
@@ -328,3 +369,6 @@ if __name__ == '__main__':
 
     # __save_xml_by_annos__(merged_annos, merged_path)
     # print(len(annos1), len(annos2), len(merged_annos))
+
+    xml_path = 'L:/GXB/lixu/label_adjusted/SDPCTJ6P/tj19062008.xml'
+    __read_detection_xml__(xml_path)
