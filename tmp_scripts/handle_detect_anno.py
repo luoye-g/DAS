@@ -34,6 +34,7 @@ def merge_detct_and_sql(xml_annos, sql_annos):
     :param xml_annos:
     :param sql_annos:
     '''
+    slide_read.open(os.path.join(slide_info.slide_path(), slide_info.slide_name()))
     insert_anno_detections = list()
     for xml_anno in xml_annos:
         xml_rect = xml_anno.cir_rect_class()
@@ -49,35 +50,35 @@ def merge_detct_and_sql(xml_annos, sql_annos):
                 if iou > max_iou:
                     max_iou = iou
                     detection = [sql_anno.aid(), xml_anno.cir_rect()]
-                # print(sql_anno.has_contours(), sql_anno.contours_text())
-                # minx = min(xml_rect.x(), sql_rect.x())
-                # miny = min(xml_rect.y(), sql_rect.y())
-                # maxx = max(xml_rect.x() + xml_rect.w(), sql_rect.x() + sql_rect.w())
-                # maxy = max(xml_rect.y() + xml_rect.h(), sql_rect.y() + sql_rect.h())
-                # slide_read.open(os.path.join(slide_info.slide_path(), slide_info.slide_name()))
-                # img = slide_read.read_region(minx, miny, maxx - minx + 1, maxy - miny + 1).copy()
+                if True:
+                    # print(sql_anno.has_contours(), sql_anno.contours_text())
+                    minx = min(xml_rect.x(), sql_rect.x())
+                    miny = min(xml_rect.y(), sql_rect.y())
+                    maxx = max(xml_rect.x() + xml_rect.w(), sql_rect.x() + sql_rect.w())
+                    maxy = max(xml_rect.y() + xml_rect.h(), sql_rect.y() + sql_rect.h())
+                    img = slide_read.read_region(minx, miny, maxx - minx + 1, maxy - miny + 1).copy()
 
-                # img = cv2.rectangle(img, (xml_rect.x() - minx, xml_rect.y() - miny), 
-                #                    (xml_rect.x() + xml_rect.w() - minx, xml_rect.y() - miny + xml_rect.h()), 
-                #                    (255, 0, 0), 1)
-                # img = cv2.rectangle(img, (sql_rect.x() - minx, sql_rect.y() - miny), 
-                #                    (sql_rect.x() + sql_rect.w() - minx, sql_rect.y() - miny + sql_rect.h()), 
-                #                    (0, 0, 255), 1)
-                # contours = sql_anno.contours()
-                # contours = np.array(contours)
-                # truncate_contours = []
-                # for contour in contours:
-                #     contour[0] -= minx
-                #     contour[1] -= miny
-                #     truncate_contours.append([int(contour[0]), int(contour[1])])
-                # img = cv2.drawContours(img, np.array([truncate_contours]), -1, (0, 0, 255))
-                # sp = os.path.join(tmp_save_path, name + '_' + xml_anno.cir_rect() + '_' +
-                #              xml_anno.anno_class() + '.jpg')
-                # cv2.imwrite(sp, img)
-                # slide_read.close()
-                # print(xml_anno.cir_rect(), sql_anno.cir_rect(), iou)
+                    img = cv2.rectangle(img, (xml_rect.x() - minx, xml_rect.y() - miny), 
+                                    (xml_rect.x() + xml_rect.w() - minx, xml_rect.y() - miny + xml_rect.h()), 
+                                    (255, 0, 0), 1)
+                    img = cv2.rectangle(img, (sql_rect.x() - minx, sql_rect.y() - miny), 
+                                    (sql_rect.x() + sql_rect.w() - minx, sql_rect.y() - miny + sql_rect.h()), 
+                                    (0, 0, 255), 1)
+                    contours = sql_anno.contours()
+                    contours = np.array(contours)
+                    truncate_contours = []
+                    for contour in contours:
+                        contour[0] -= minx
+                        contour[1] -= miny
+                        truncate_contours.append([int(contour[0]), int(contour[1])])
+                    img = cv2.drawContours(img, np.array([truncate_contours]), -1, (0, 0, 255))
+                    sp = os.path.join(tmp_save_path, name + '_' + xml_anno.cir_rect() + '_' +
+                                xml_anno.anno_class() + '.jpg')
+                    cv2.imwrite(sp, img)
+                    print(xml_anno.cir_rect(), sql_anno.cir_rect(), iou, sql_anno.has_contours())
         if detection is not None:
             insert_anno_detections.append(detection)
+    slide_read.close()
     print(len(xml_annos), len(insert_anno_detections))
     return insert_anno_detections
 # path
@@ -87,7 +88,7 @@ slide_format = 'sdpc'
 
 detect_path = 'L:/GXB/lixu/label_adjusted'
 xml_items = os.listdir(detect_path)
-for xml_item in xml_items:
+for xml_item in xml_items[2: ]:
     xmls = os.listdir(os.path.join(detect_path, xml_item))
     xmls = [x for x in xmls if x.find('.xml') != -1]
     us = xml_item.split('_')
@@ -104,7 +105,7 @@ for xml_item in xml_items:
         # handle detection xml
         c_xml_path = os.path.join(detect_path, xml_item, xml)
         xml_annos, _ = read_detection_xml(c_xml_path)
-        print(c_xml_path, len(xml_annos))
+        print('(%d/%d)' % (xk + 1, len(xmls)), c_xml_path, len(xml_annos))
         
 
         # query slide info
@@ -123,6 +124,7 @@ for xml_item in xml_items:
         insert_anno_detections = merge_detct_and_sql(xml_annos, sql_annos)
 
         for anno_detection in insert_anno_detections:
-            insert_anno_detection(anno_detection[0], anno_detection[1])
-        # break
+            pass
+            # insert_anno_detection(anno_detection[0], anno_detection[1])
+        break
     break
