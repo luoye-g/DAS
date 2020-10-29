@@ -45,3 +45,32 @@ def read_model2_txt(txt_path, mpp):
             anno_class = 'pos'
             coors.append([x, y, w, h, anno_class])
     return coors
+
+
+# tmp code , del after
+
+def modify_database():
+    
+    from mysql.sql_con import sql_proxy
+    from mysql.sql_op import query_slide_info, query_annos, update_annoatations_sid
+    # sql_proxy.connect()
+
+    slide_infos = query_slide_info('Non-BD', 'WNLO', 'Shengfuyou_3th', 'Yes', 'svs', zoom = '10x')
+    for slide_info in slide_infos:
+        # slide_info.show_info()
+        annos = query_annos(slide_info.sid())
+        print(slide_info.slide_path(), slide_info.slide_name(), len(annos))
+        
+        s_infos = query_slide_info('Non-BD', 'WNLO', 'Shengfuyou_3th', 'Yes', 'svs', zoom = '20x', slide_name=slide_info.slide_name())
+        if len(s_infos) != 1:
+            print(len(s_infos), 'error')
+            continue
+        s_info = s_infos[0]
+        print(s_info.zoom())
+        for anno in annos:
+            update_annoatations_sid(anno.aid(), s_info.sid())
+
+    # sql_proxy.close()
+
+if __name__ == "__main__":
+    modify_database()

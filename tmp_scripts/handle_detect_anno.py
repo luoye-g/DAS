@@ -1,7 +1,7 @@
 import os
 import cv2
 from format_conversion.xml_tools import read_detection_xml
-from mysql.sql_op import query_slide_info, query_annos, insert_anno_detection
+from mysql.sql_op import query_slide_info, query_annos, insert_anno_detection, update_annotations_contours
 from format_conversion.codes import cc
 from slide_read_tools.slide_read_factory import srf
 from tmp_scripts.scripts_tools import if_intersection
@@ -36,9 +36,10 @@ def merge_detct_and_sql(xml_annos, sql_annos):
     '''
     slide_read.open(os.path.join(slide_info.slide_path(), slide_info.slide_name()))
     insert_anno_detections = list()
+    update_sql_annos = list()
     for xml_anno in xml_annos:
         xml_rect = xml_anno.cir_rect_class()
-        max_iou, detection = 0, None
+        max_iou, detection, update_sql_anno = 0, None, None
         for sql_anno in sql_annos:
             sql_rect = sql_anno.cir_rect_class()
             if_inter, iou = if_intersection(xml_rect.x(), xml_rect.y(), 
@@ -49,8 +50,9 @@ def merge_detct_and_sql(xml_annos, sql_annos):
                 # print(xml_anno.cir_rect())
                 if iou > max_iou:
                     max_iou = iou
+                    update_sql_anno = sql_anno
                     detection = [sql_anno.aid(), xml_anno.cir_rect()]
-                if True:
+                if save_img_flag:
                     # print(sql_anno.has_contours(), sql_anno.contours_text())
                     minx = min(xml_rect.x(), sql_rect.x())
                     miny = min(xml_rect.y(), sql_rect.y())
@@ -76,11 +78,19 @@ def merge_detct_and_sql(xml_annos, sql_annos):
                                 xml_anno.anno_class() + '.jpg')
                     cv2.imwrite(sp, img)
                     print(xml_anno.cir_rect(), sql_anno.cir_rect(), iou, sql_anno.has_contours())
-        if detection is not None:
+        # update sql_anno
+        if update_sql_anno is not None and len(update_sql_anno.contours()) <= 4:
+            # print(max_iou)
+            update_sql_anno.set_center_point(xml_anno.center_point_class())
+            update_sql_anno.set_cir_rect(xml_anno.cir_rect_class())
+            update_sql_anno.set_contours(xml_anno.contours())
+            update_sql_annos.append(update_sql_anno)
+        elif detection is not None:
             insert_anno_detections.append(detection)
+
     slide_read.close()
-    print(len(xml_annos), len(insert_anno_detections))
-    return insert_anno_detections
+    print(len(xml_annos), len(insert_anno_detections), len(update_sql_annos))
+    return insert_anno_detections, update_sql_annos
 # path
 tmp_save_path = 'L:/GXB/tmp1'
 slide_path = 'H:/TCTDATA'
@@ -88,7 +98,12 @@ slide_format = 'sdpc'
 
 detect_path = 'L:/GXB/lixu/label_adjusted'
 xml_items = os.listdir(detect_path)
-for xml_item in xml_items[2: ]:
+
+
+update_sql_flag = False
+save_img_flag = True
+# WNLO's Shengfuyou_3th and Shengfuyou_5th
+for xml_item in xml_items[12: ]:
     xmls = os.listdir(os.path.join(detect_path, xml_item))
     xmls = [x for x in xmls if x.find('.xml') != -1]
     us = xml_item.split('_')
@@ -107,24 +122,30 @@ for xml_item in xml_items[2: ]:
         xml_annos, _ = read_detection_xml(c_xml_path)
         print('(%d/%d)' % (xk + 1, len(xmls)), c_xml_path, len(xml_annos))
         
-
         # query slide info
         slide_list = query_slide_info(pro_method, image_method, slide_group, is_positive, slide_format, 
                                       name + '.' + slide_format, zoom)
         assert len(slide_list) == 1
         slide_info = slide_list[0]
         # check annos
-        # save_tmp_img(slide_read, xml_annos, slide_info, tmp_path)
-
+        # save_tmp_img(slide_read, xml_annos, slide_info, tmp_save_path)
+        
         sql_annos = query_annos(slide_info.sid())
         print('sql annos len: ', len(sql_annos))
         # check sql annos
         # save_tmp_img(slide_read, sql_annos, slide_info, tmp_save_path)
         
-        insert_anno_detections = merge_detct_and_sql(xml_annos, sql_annos)
+        insert_anno_detections, update_sql_annos = merge_detct_and_sql(xml_annos, sql_annos)
+
+        if not update_sql_flag:
+            continue
 
         for anno_detection in insert_anno_detections:
-            pass
-            # insert_anno_detection(anno_detection[0], anno_detection[1])
-        break
+            insert_anno_detection(anno_detection[0], anno_detection[1])
+        
+        # correct the sql_annos
+        for usa in update_sql_annos:
+            update_annotations_contours(usa.aid(), usa.center_point(), usa.cir_rect(), usa.contours_text())
+        
+        # break
     break

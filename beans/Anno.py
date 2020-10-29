@@ -38,12 +38,14 @@ class Annotation:
         self._color = color
         self._is_typical = is_typical
 
+    def set_center_point(self, center_point): self._center_point = center_point
     def center_point(self):
         return self._center_point.c_str()
+    def center_point_class(self,): return self._center_point
 
     def cir_rect(self):
         return self._cir_rect.c_str()
-
+    def set_cir_rect(self, cir_rect): self._cir_rect = cir_rect
     def cir_rect_class(self):
         return self._cir_rect
 
@@ -59,8 +61,9 @@ class Annotation:
     def anno_class(self):
         return self._anno_class
 
-    def contours(self):
-        return self._contours
+
+    def set_contours(self, contours): self._contours = contours
+    def contours(self): return self._contours
     
     def contours_text(self):
         text = str()

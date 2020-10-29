@@ -1,4 +1,5 @@
 import openslide
+import numpy as np
 
 class SvsProxy:
 
@@ -35,6 +36,13 @@ class SvsProxy:
             return 0
     def width(self): return self._proporties['openslide.level[0].width']
     def height(self): return self._proporties['openslide.level[0].height']
+
+    def read_region(self, x, y, w, h, level=0):
+        img = self._ors.read_region((x, y), level, (w, h))
+        img = np.array(img)
+        img = img[:, :, 0: 3]
+        img = img[:, :, ::-1]
+        return img
 
 
     def close(self):

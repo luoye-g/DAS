@@ -287,5 +287,5 @@ if __name__ == '__main__':
 
     # sql_proxy = MySQLProxy()
     sql_proxy.connect()
-    read_all_xml('L:/GXB/unified_xml/SZSQ/Tongji_5th/Positive')
+    read_all_xml('L:/GXB/unified_xml/SZSQ/Shengfuyou_5th/Positive')
     sql_proxy.close()

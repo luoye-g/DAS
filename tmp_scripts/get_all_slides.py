@@ -11,7 +11,7 @@ def get_slide_info(slide_path, slide_format):
     slide_name = slide_path[slide_path.rfind('/') + 1:]
     slide_path = slide_path[: slide_path.rfind('/')]
 
-    pro_method = 'BD'
+    pro_method = 'Non-BD'
     image_method = slide_path.split('/')[2]
     slide_group = slide_path.split('/')[3]
     if slide_path.find('Not_BD') != -1:
@@ -81,8 +81,8 @@ def get_all_slides(slides_path, slide_format = 'mrxs'):
 
 read_slide_log = open('./read_slides.log', 'a+')
 
-slides_path = 'H:/TCTDATA/BD'
-slide_format = 'srp'
+slides_path = 'H:/TCTDATA/WNLO/Shengfuyou_3th/positive'
+slide_format = 'svs'
 sql_proxy = MySQLProxy()
 sql_proxy.connect()
 get_all_slides(slides_path, slide_format)

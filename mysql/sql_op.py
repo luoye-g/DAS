@@ -107,6 +107,32 @@ def insert_anno_detection(aid, detection_box):
     sql_proxy.exceute_update(sql)
     sql_proxy.close()
 
+
+def update_annotations_contours(aid, center_point, cir_rect, contours):
+    '''
+    :param aid:
+    :param center_point:
+    :param cir_rect:
+    :param contours:
+    '''
+    sql_proxy.connect()
+    sql = 'update annotations set center_point=\'%s\', cir_rect=\'%s\', contours=\'%s\' where aid=%s' % \
+            (center_point, cir_rect, contours, aid)
+    # print(sql)
+    sql_proxy.exceute_update(sql)
+    sql_proxy.close()
+
+def update_annoatations_sid(aid, sid):
+    '''
+    :param aid: primary key
+    :param sid: reference key
+    '''
+    sql_proxy.connect()
+    sql = 'update annotations set sid = %s where aid = %s' % (sid, aid)
+    sql_proxy.exceute_update(sql)
+    sql_proxy.close()
+
+
 def update_annotations_is_typical(aid, sid, is_typical):
     '''
     :param aid:
