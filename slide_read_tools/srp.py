@@ -28,7 +28,7 @@ class SrpProxy:
         img = self._ors.ReadRegionRGB(level, x, y, w, h)
         img = np.ctypeslib.as_array(img)
         img.dtype = np.uint8
-        img = img.reshape((w, h, 3))
+        img = img.reshape((h, w, 3))
         img = np.uint8(img)
         return img
 

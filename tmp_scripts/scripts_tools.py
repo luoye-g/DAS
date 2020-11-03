@@ -46,31 +46,14 @@ def read_model2_txt(txt_path, mpp):
             coors.append([x, y, w, h, anno_class])
     return coors
 
-
-# tmp code , del after
-
-def modify_database():
-    
-    from mysql.sql_con import sql_proxy
-    from mysql.sql_op import query_slide_info, query_annos, update_annoatations_sid
-    # sql_proxy.connect()
-
-    slide_infos = query_slide_info('Non-BD', 'WNLO', 'Shengfuyou_3th', 'Yes', 'svs', zoom = '10x')
-    for slide_info in slide_infos:
-        # slide_info.show_info()
-        annos = query_annos(slide_info.sid())
-        print(slide_info.slide_path(), slide_info.slide_name(), len(annos))
-        
-        s_infos = query_slide_info('Non-BD', 'WNLO', 'Shengfuyou_3th', 'Yes', 'svs', zoom = '20x', slide_name=slide_info.slide_name())
-        if len(s_infos) != 1:
-            print(len(s_infos), 'error')
-            continue
-        s_info = s_infos[0]
-        print(s_info.zoom())
-        for anno in annos:
-            update_annoatations_sid(anno.aid(), s_info.sid())
-
-    # sql_proxy.close()
+import json
+def read_detection_json(json_path, anno_class = 'nplus'):
+    coors = list()
+    with open(json_path, 'r', encoding='utf8')as fp:
+        json_data = json.load(fp)
+        for item in json_data:
+            coors.append([item['x'], item['y'], item['w'], item['h'], anno_class])
+    return coors
 
 if __name__ == "__main__":
-    modify_database()
+    read_detection_json('L:/GXB/lixu/FP_3000/FP_3000/BD/Xiehe_1th/TG2323474.json')

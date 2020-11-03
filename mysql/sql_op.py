@@ -108,6 +108,16 @@ def insert_anno_detection(aid, detection_box):
     sql_proxy.close()
 
 
+def del_anno_by_aid(aid):
+    '''
+    :param aid:
+    '''
+    sql_proxy.connect()
+    sql = 'delete from annotations where aid = %s;' % aid
+    sql_proxy.exceute_update(sql)
+    sql_proxy.close()
+
+
 def update_annotations_contours(aid, center_point, cir_rect, contours):
     '''
     :param aid:
@@ -202,7 +212,7 @@ def query_slide_info(pro_method='%',
                     image_method='%',
                     slide_group='%',
                     is_positive='%',
-                    slide_format='%s',
+                    slide_format='%',
                     slide_name='%',
                     zoom='%'):
     '''
