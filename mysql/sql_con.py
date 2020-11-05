@@ -60,30 +60,6 @@ class MySQLProxy:
         #     print('insert into class_code error')
         #     self._db.rollback()
 
-    def insert_into_slide_sub_class(self, data):
-        '''
-        ��slide_sub_class���в�������
-        :param data: ������֯��ʽΪ�ֵ�
-        :return:
-        '''
-        # print(data)
-        sql = """insert into slide_sub_class
-        (slide_name, slide_group, slide_format, pro_method, image_method, age, Medical_history, sub_class, 
-        remarks, is_positive)
-        VALUES 
-        ('%s', '%s', '%s', '%s', '%s', %s, '%s', '%s', '%s', '%s');
-        """ % (data['slide_name'], data['slide_group'], data['slide_format'], data['pro_method'],
-               data['image_method'], data['age'], data['Medical_history'], data['sub_class'],
-               data['remarks'], data['is_positive'])
-        # print(sql)
-        cursor = self._db.cursor()
-        # try:
-        cursor.execute(sql)
-        self._db.commit()
-        # except:
-        #     print('error')
-        #     self._db.rollback()
-
     def create_slide_sub_class(self):
         '''
         ����slide_sub_class��
@@ -272,14 +248,6 @@ def concret_xml(xml_path):
 
 def read_all_xml(xmls_path):
     concret_xml(xmls_path)
-    # total = 0
-    # print('%-15s%-20s%-15s%s' % ('method', 'group', 'is_pos', 'num'))
-    # for key in xml_map.keys():
-    #     uints = key.split(',')
-    #     print('%-15s%-20s%-15s%d' % (uints[0], uints[1], uints[2], xml_map[key]))
-    #     total += xml_map[key]
-    #     # print(key, xml_map[key])
-    # print('total xml count: %d' % total)
     
 sql_proxy = MySQLProxy()
 xml_map = dict()

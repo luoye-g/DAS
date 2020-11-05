@@ -1,7 +1,10 @@
 # coding: gbk
 import os
-
+import cv2
 from mysql.sql_op import query_slide_info
+from slide_read_tools.slide_read_factory import srf
+
+tmp_save_path = 'L:/GXB/tmp1'
 
 anno_path = 'L:/sub_nplus'
 anno_items = os.listdir(anno_path)
@@ -16,6 +19,7 @@ anno_dict = {
 }
 
 image_method_dict = {'01': '3DHistech', '02': 'WNLO' , '03': 'SZSQ', '04': 'SZSQ'}
+format_dict = {'3DHistech': 'mrxs', 'WNLO': 'svs' , 'SZSQ': 'sdpc'}
 zoom_dict = {'01': '20x', '02': '20x' , '03': '40x', '04': '40x'}
 group_dict = {'sfy8p':      ['Shengfuyou_8th', 'Yes'], 
               'sfy7p':      ['Shengfuyou_7th', 'Yes'], 
@@ -51,7 +55,8 @@ group_dict = {'sfy8p':      ['Shengfuyou_8th', 'Yes'],
               'oursfy5':    ['Shengfuyou_5th', 'Yes'], 
               'hardslide':  ['a', '1']
               }
-
+p_slides_dict = {}
+imgs_dict = dict()
 for anno_item in anno_items:
     
     print(anno_item, anno_dict[anno_item])
@@ -67,10 +72,11 @@ for anno_item in anno_items:
             us = img.split('__')
             image_method = image_method_dict[us[0]]
             zoom = zoom_dict[us[0]]
-            if us[1] == 'hardslide':
-                continue
             slide_group = group_dict[us[1]][0]
             is_positive = group_dict[us[1]][1]
+            if us[1] == 'hardslide':
+                slide_group = '%'
+                is_positive = '%'
             name = us[2]
             anno_class = us[3]
             model3_class = us[4]
@@ -78,15 +84,73 @@ for anno_item in anno_items:
             y = int(us[8])
             w = int(us[9])
             h = int(us[10])
-            # print(us)
+
+            combine_anno_info = [image_method, slide_group, is_positive, zoom, name, format_dict[image_method], 
+                                anno_class, model3_class, x, y, w, h, a_class, img]
+
+            # combine key
+            key = '%s__%s__%s__%s__%s' % (image_method, slide_group, name, is_positive, zoom)
+            if key not in imgs_dict.keys():
+                imgs_dict[key] = [combine_anno_info]
+            else:
+                imgs_dict[key].append(combine_anno_info)
+        
+        print(len(imgs_dict.keys()))
+for key in imgs_dict.keys():
+    image_method = imgs_dict[key][0][0]
+    slide_group = imgs_dict[key][0][1]
+    is_positive = imgs_dict[key][0][2]
+    zoom = imgs_dict[key][0][3]
+    name = imgs_dict[key][0][4]
+    ft = imgs_dict[key][0][5]
+    slide_infos = query_slide_info(pro_method='Non-BD', image_method=image_method, zoom=zoom, 
+                                    slide_group=slide_group, slide_name=name + '%' + ft, is_positive=is_positive)
+    if len(slide_infos) == 0:
+        name = name.replace('-', ' ')
+        slide_infos = query_slide_info(pro_method='Non-BD', image_method=image_method, zoom=zoom, 
+                                        slide_group=slide_group, slide_name=name + '%' + ft, is_positive=is_positive)
+        if len(slide_infos) == 0:
             slide_infos = query_slide_info(pro_method='Non-BD', image_method=image_method, zoom=zoom, 
-                                           slide_group=slide_group, slide_name=name + '%', is_positive=is_positive)
-            if len(slide_infos) == 0:
-                name = us[2].replace('-', ' ')
-                slide_infos = query_slide_info(pro_method='Non-BD', image_method=image_method, zoom=zoom, 
-                                               slide_group=slide_group, slide_name='%' + name + '%', is_positive=is_positive)
-            assert len(slide_infos) > 0
-            if len(slide_infos) > 1:
-                print(us, len(slide_infos))
+                                        slide_group=slide_group, slide_name='sfy' + name + '%' + ft, is_positive=is_positive)
+    if len(slide_infos) > 1:
+        slide_infos = query_slide_info(pro_method='Non-BD', image_method=image_method, zoom=zoom, 
+                                        slide_group=slide_group, slide_name=name + '.' + ft, is_positive=is_positive)
+    if len(slide_infos) == 0:
+        slide_infos = query_slide_info(pro_method='Non-BD', image_method=image_method, zoom=zoom, 
+                                    slide_group=slide_group, slide_name=name + '%', is_positive=is_positive)
+            
+    if len(slide_infos) != 1:
+        new_slide_infos = list()
+        for slide in slide_infos:
+            if slide.slide_group().find('th') != -1:
+                new_slide_infos.append(slide)
+        slide_infos = new_slide_infos
+    if len(slide_infos) == 1:
+        p_slides_dict[key] = [slide_infos[0], imgs_dict[key]]
+    else:
+        print(key)
+        print(imgs_dict[key])
 
+log_txt = open(os.path.join(tmp_save_path, 'log.txt'), 'w')
+for key in p_slides_dict.keys():
+    
+    print(key, len(p_slides_dict[key][1]))
+    slide_read = srf.get_proxy(p_slides_dict[key][1][0][5])
+    slide_info = p_slides_dict[key][0]
+    slide_read.open(os.path.join(slide_info.slide_path(), slide_info.slide_name()))
+    for anno in p_slides_dict[key][1]:
+        log_txt.write(os.path.join(slide_info.slide_path(), slide_info.slide_name()) + '\n')
+        x = anno[8] + slide_info.bounds_x()
+        y = anno[9] + slide_info.bounds_y()
+        w = anno[10]
+        h = anno[11]
+        if slide_info.slide_group().find('Shengfuyou_8th') != -1 or \
+           slide_info.slide_group().find('Shengfuyou_7th') != -1:
+            x = x - int(w / 2)
+            y = y - int(h / 2)
+        img = slide_read.read_region(x, y, w, h)
+        cv2.imwrite(os.path.join(tmp_save_path, anno[-1]), img)
+        break
+    slide_read.close()
 
+log_txt.close()
