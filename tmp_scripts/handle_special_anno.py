@@ -131,6 +131,8 @@ for key in imgs_dict.keys():
         print(key)
         print(imgs_dict[key])
 
+
+
 log_txt = open(os.path.join(tmp_save_path, 'log.txt'), 'w')
 for key in p_slides_dict.keys():
     
