@@ -22,6 +22,9 @@
     model3:
     'typical_pos'   0900
     'nplus'         0902
+    'cornified'     0903
+    'superficial'   0904
+    'atrophy'       0905
 '''
 class cc:
     code_to_class = {
@@ -73,29 +76,55 @@ class cc:
         '1300': 'Endometrium',
         '0900': 'typical_pos',
         '0902': 'nplus',
+        '0903': 'cornified',
+        '0904': 'superficial',
+        '0905': 'atrophy',
+        '0906': 'NILM',
     }
 
     class_to_code = {
         'ASC-H':        '2112',
         'ASC-H_0.0':    '2112',
         'ASC-H_0.100':  '2112',
+        'ASC-H.contour.same':   '2112',
         'ASCH':         '2112',
+        'ASC-H.delete1':'2112',
+        'ASC-H.same':   '2112',
+        'ASC-US.same':  '2112',
+        'ASC-H.new':    '2112',
         'ASC-US':       '2111',
         'ASC-US_0.0':   '2111',
         'ASC-US_0.100': '2111',
+        'ASC-US.contour.same':  '2111',
+        'ASC-US.delete1':'2111',
+        'ASC-US.delete11':'2111',
         'ASCUS':        '2111',
+        'ASC':          '2111',
+        'ASC-US':       '2111',
+        'ASC-US.new':   '2111',
+        'ACC-US':       '2111',
         'HSIL':         '2130',
         'HISL':         '2130',
+        'HSIL.new':     '2130',
+        'HSIL.delete11':'2130',
+        'HSIL.delete1': '2130',
+        'HSIL.same':    '2130',
         'HSIL_0.0':     '2130',
         'HSIL_0.100':   '2130',
         'nGEC':         '0200',
         'nGEC_0.0':     '0200',
         'nGEC_0.100':   '0200',
         'NGEC':         '0200',
+        'ngec':         '0200',
         'LSIL':         '2120',
         'LISL':         '2120',
         'LSIL_0.0':     '2120',
         'LSIL_0.100':   '2120',
+        'LSIL.new':     '2120',
+        'LSIL.same':    '2120',
+        'LSIL.contour.same':'2120',
+        'LSIL.DELETE1': '2120',
+        'LSIL.delete1': '2120',
         'others':       '3000',
         'normal':       '0000',
         'Normal':       '0000',
@@ -165,6 +194,10 @@ class cc:
         'Endometrium':  '1300',  # 子宫内膜细胞
         'typical_pos':  '0900',
         'nplus':        '0902',
+        'cornified':    '0903',
+        'superficial':  '0904',
+        'atrophy':      '0905',
+        'NILM':         '0906',
     }
 
     type_name = ["HSIL", "LSIL", "ASC-US", "AGC", "nGEC", "HCG", "SSC", "Candidate"]  # , "Normal"] #normal 不需要展示

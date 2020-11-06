@@ -107,6 +107,16 @@ def insert_anno_detection(aid, detection_box):
     sql_proxy.exceute_update(sql)
     sql_proxy.close()
 
+def insert_anno_special(aid, sp_class):
+    '''
+    :param aid: 
+    :param sp_class:
+    '''
+    sql_proxy.connect()
+    sql = 'insert into anno_special (aid, sp_class) values (%s, \'%s\');' % (aid, sp_class)
+    sql_proxy.exceute_update(sql)
+    sql_proxy.close()
+
 
 def del_anno_by_aid(aid):
     '''
@@ -142,6 +152,21 @@ def update_annoatations_sid(aid, sid):
     sql_proxy.exceute_update(sql)
     sql_proxy.close()
 
+
+def update_annotations_special(aid, is_typical, is_hard, anno_class, anno_code, type):
+    '''
+    :param is_typical:
+    :param is_hard:
+    :param anno_class:
+    :param anno_code
+    :param type
+    return 
+    '''
+    sql_proxy.connect()
+    sql = 'update annotations set is_typical=\'%s\', is_hard=\'%s\', anno_class=\'%s\', \
+    anno_code=\'%s\', type=\'%s\' where aid=%s;' % (is_typical, is_hard, anno_class, anno_code, type, aid)
+    sql_proxy.exceute_update(sql)
+    sql_proxy.close()
 
 def update_annotations_is_typical(aid, sid, is_typical):
     '''
