@@ -194,6 +194,8 @@ class cc:
         'Endometrium':  '1300',  # 子宫内膜细胞
         'typical_pos':  '0900',
         'nplus':        '0902',
+        '固缩':         '0903',
+        '1.5倍':        '0903',
         'cornified':    '0903',
         'superficial':  '0904',
         'atrophy':      '0905',

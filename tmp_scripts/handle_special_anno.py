@@ -2,18 +2,14 @@
 import os
 import cv2
 import random
+
 from tmp_scripts.scripts_tools import if_intersection
 from mysql.sql_op import query_slide_info, query_annos, insert_annotations, insert_anno_special, update_annotations_special
 from slide_read_tools.slide_read_factory import srf
 from beans.type_c import Rect, Point
 from beans.Anno import Annotation
 from format_conversion.codes import cc
-
-tmp_save_path = 'L:/GXB/tmp1'
-
-anno_path = 'L:/sub_nplus'
-anno_items = os.listdir(anno_path)
-
+from format_conversion.xml_tools import read_xml_by_path
 
 anno_dict = {
     '±ßÔµÏ¸°û':         'boarder_cell', 
@@ -69,126 +65,80 @@ def merge_anno(sql_annos, spe_annos):
     :param spe_annos:
     :return 
     '''
-    filter_sep_annos = list()
-    update_sql_annos = list()
-    for spe in spe_annos:
-        del_flag = False
+    spe_insert_annos = []
+    sql_update_annos = []
+    for s in spe_annos:
         max_iou = 0
+        del_flag = False
         update_sql_anno = None
+        sr = s.cir_rect_class()
         for sql in sql_annos:
             t = sql.cir_rect_class()
-            if_inter, iou = if_intersection(spe[0], spe[1], spe[2], spe[3], 
+            if_inter, iou = if_intersection(sr.x(), sr.y(), sr.w(), sr.h(), 
                                             t.x(), t.y(), t.w(), t.h())
             if if_inter and iou > 0.1:
                 if iou > max_iou:
                     max_iou = iou
+                    del_flag = True
                     update_sql_anno = sql
-                del_flag = True
-                # print(spe, sql.cir_rect(), sql.anno_class(), iou)
+                # print(s.cir_rect(), sql.cir_rect(), sql.anno_class(), iou)
         if not del_flag:
-            filter_sep_annos.append(spe)
+            spe_insert_annos.append(s)
         else:
-            update_sql_annos.append([update_sql_anno, spe, max_iou])
-    # print(len(spe_annos), len(sql_annos), len(filter_sep_annos), len(update_sql_annos))
+            sql_update_annos.append(update_sql_anno)
+    print(len(sql_annos), len(spe_annos), len(spe_insert_annos), len(sql_update_annos))
+    return spe_insert_annos, sql_update_annos
 
-    return update_sql_annos, filter_sep_annos
 
-from jd.json_utils import load_dict, save_dict
-# save_dict(p_slides_dict, 'tmp.json')
-# assert 1 == 0
-p_slides_dict = load_dict('tmp.json')
+tmp_save_path = 'L:/GXB/tmp1'
 
-group_dict = dict()
+xml_path = 'L:/ÒµÎñÎÄµµ/TotalLabelFiles/originalBackup/Î®Ëõ'
+anno_items = os.listdir(xml_path)
+anno_items = [x for x in anno_items if x.find('.xml') != -1]
 
-log_txt = open(os.path.join(tmp_save_path, 'log.txt'), 'w')
-for key in p_slides_dict.keys():
-    uints = key.split('__')
-    tk = '%s__%s__%s' % (uints[0], uints[1], uints[3])
-    # if tk not in group_dict.keys():
-    #     group_dict[tk] = [key]
-    # else:
-    #     if len(group_dict[tk]) > 20:
-    #         continue
-    #     group_dict[tk].append(key)
-    # print(key, len(p_slides_dict[key][1]))
-    slide_read = srf.get_proxy(p_slides_dict[key][1][0][5])
-    slide_info = p_slides_dict[key][0]
-    # slide_read.open(os.path.join(slide_info[0], slide_info[1]))
+read_tools = srf.get_proxy('sdpc')
+for anno_item in anno_items:
+    annos, _ = read_xml_by_path(os.path.join(xml_path, anno_item))
+    print(anno_item, len(anno_item))
 
-    annos = p_slides_dict[key][1]
-    sid = slide_info[4]
-    # print(len(sql_annos))
-    sql_annos = query_annos(sid)
-    special_annos = list()
-    for ind, anno in enumerate(annos):
-        log_txt.write(os.path.join(slide_info[0], slide_info[1]) + '\n')
-        x, y = anno[8], anno[9]
-        w = anno[10]
-        h = anno[11]
-        x, y = x + slide_info[2], y + slide_info[3]
-        if anno[-1].find('02__oursfy5') != -1:
-            x = x - int(w / 2) + 256
-            y = y - int(h / 2) + 256
-        elif anno[-1].find('03__szsqtj3p') != -1:
-            x = x - int(w / 2) + int(512 * 0.293 / 0.180321 / 2)
-            y = y - int(h / 2) + int(512 * 0.293 / 0.180321 / 2)
-        elif tk.find('3DHistech') != -1 and (tk.find('Shengfuyou_1th__No') != -1 or tk.find('Shengfuyou_2th__Yes') != -1):
-            x, y = x - slide_info[2], y - slide_info[3]
-            x = x - int(w / 2) + int(512 * 0.293 / 0.243 / 2)
-            y = y - int(h / 2) + int(512 * 0.293 / 0.243 / 2)
-        elif tk.find('WNLO__Shengfuyou_3th') !=- 1:
-            x = x - int(w / 2) + 256
-            y = y - int(h / 2) + 256
-        elif tk.find('WNLO__Shengfuyou_4th') != -1:
-            if anno[-1].find('256__256') != -1:
-                pass
-            elif anno[-1].find('oursfy4') != -1:
-                x = x - int(w / 2) + 256
-                y = y - int(h / 2) + 256
-            else:
-                pass
-        elif slide_info[0].find('XiaoYuWei') != -1:
-            x = x + int(512 * 0.293 / 0.17817 / 2) - int(w / 2)
-            y = y + int(512 * 0.293 / 0.17817 / 2) - int(h / 2)
-        elif slide_info[0].find('Tongji') != -1 and tk.find('No') != -1:
-            x = x - int(w / 2)
-            y = y - int(h / 2)
-        elif tk.find('SZSQ__Shengfuyou_3th') != -1:
-            if anno[-1].find('szsqsfy3p') != -1:
-                x = x - int(w / 2) + int(512 * 0.293 / 0.180321 / 2)
-                y = y - int(h / 2) + int(512 * 0.293 / 0.180321 / 2)
-            else:
-                pass
-        elif tk.find('SZSQ__Shengfuyou') != -1:
-            if anno[-1].find('szsqsfy') != -1:
-                x = x - int(w / 2) + int(512 * 0.293 / 0.180321 / 2)
-                y = y - int(h / 2) + int(512 * 0.293 / 0.180321 / 2)
-            elif anno[-1].find('415__415') != -1:
-                x = x - int(w / 2)
-                y = y - int(h / 2)
-            else :
-                pass
-        elif tk.find('3DHistech__Shengfuyou_1th__Yes') != -1:
-            if anno[-1].find('same') != -1 or anno[-1].find('delete') != -1 or \
-               anno[-1].find('new') != -1:
-                x, y = x - slide_info[2], y - slide_info[3]
-                x = x - int(w / 2) + int(512 * 0.293 / 0.243 / 2)
-                y = y - int(h / 2) + int(512 * 0.293 / 0.243 / 2)
-            else:
-                pass
-        
-        # x, y, w, h
-        sp_class = anno[12]
-        concrete_class = anno[6]
-        model3_class = anno[7]
-        special_annos.append([x, y, w, h, sp_class, concrete_class, model3_class])
-    #     img = slide_read.read_region(x, y, w, h)
-    #     if not os.path.exists(os.path.join(tmp_save_path, tk)):
-    #         os.makedirs(os.path.join(tmp_save_path, tk))
-    #     cv2.imwrite(os.path.join(tmp_save_path, tk, anno[-1]), img)
-    #     break
-    # slide_read.close()
+    slide_name = anno_item[: anno_item.find('.')]
+    slide_infos = query_slide_info(slide_name=slide_name + '%', slide_format='sdpc')
+    slide_infos = [x for x in slide_infos if x.slide_path().find('Atrophy') == -1]
+    assert len(slide_infos) == 1
+    slide_info = slide_infos[0]
+    # read_tools.open(os.path.join(slide_info.slide_path(), slide_info.slide_name()))
 
+    filter_annos = list()
+    for anno in annos:
+        rect = anno.cir_rect_class()
+        # img = read_tools.read_region(rect.x(), rect.y(), rect.w(), rect.h())
+        # cv2.imwrite(os.path.join(tmp_save_path, slide_info.slide_name()) + anno.cir_rect() + '.jpg', img)
+        # break
+        if rect.w() < 20 and rect.h() < 20:
+            continue
+        filter_annos.append(anno)
+    # read_tools.close()
+    annos = filter_annos
+
+    sql_annos = query_annos(slide_info.sid())
+    spe_insert_annos, sql_update_annos = merge_anno(sql_annos, annos)
+
+    c = 'atrophy'
+    for sql_update_anno in sql_update_annos:
+        # continue
+        update_annotations_special(sql_update_anno.aid(), sql_update_anno.is_typical(), sql_update_anno.is_hard(), 
+                                   c , cc.class_to_code[c], sql_update_anno.type())
+
+    for spe_insert_anno in spe_insert_annos:
+        # continue
+        spe_insert_anno.set_anno_class(c)
+        spe_insert_anno.set_anno_code(cc.class_to_code[c])
+        spe_insert_anno.set_sid(slide_info.sid())
+        spe_insert_anno.set_is_hard('No')
+        insert_annotations([spe_insert_anno])
+
+    continue
+    
     update_sql_annos, filter_sep_annos = merge_anno(sql_annos, special_annos)
     print(len(update_sql_annos), len(filter_sep_annos))
     # continue
@@ -242,5 +192,4 @@ for key in p_slides_dict.keys():
                             anno_code, type, has_contours, color, is_typical)
         anno.set_sid(sid)
         anno.set_is_hard(is_hard)
-        insert_annotations([anno])
-log_txt.close()
+        # insert_annotations([anno])

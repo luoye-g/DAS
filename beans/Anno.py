@@ -51,6 +51,9 @@ class Annotation:
 
     def anno_code(self):
         return self._anno_code
+    
+    def set_anno_code(self, anno_code):
+        self._anno_code = anno_code
 
     def is_typical(self):
         return self._is_typical
@@ -61,6 +64,8 @@ class Annotation:
     def anno_class(self):
         return self._anno_class
 
+    def set_anno_class(self, anno_class):
+        self._anno_class = anno_class
 
     def set_contours(self, contours): self._contours = contours
     def contours(self): return self._contours
