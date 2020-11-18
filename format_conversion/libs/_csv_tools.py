@@ -99,7 +99,7 @@ def __read_csv_by_path__(csv_path, csv_name, level=0):
     return annos, None
 
 
-def __csv_read_lines(path):
+def __csv_read_lines__(path):
     csv_lines = open(path, 'r').readlines()
     lines = list()
     for line in csv_lines:

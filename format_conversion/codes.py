@@ -25,6 +25,8 @@
     'cornified'     0903
     'superficial'   0904
     'atrophy'       0905
+    'NILM'          0906
+    'FP_hard'       0907
 '''
 class cc:
     code_to_class = {
@@ -80,6 +82,7 @@ class cc:
         '0904': 'superficial',
         '0905': 'atrophy',
         '0906': 'NILM',
+        '0907': 'FP_Hard',
     }
 
     class_to_code = {
@@ -200,6 +203,7 @@ class cc:
         'superficial':  '0904',
         'atrophy':      '0905',
         'NILM':         '0906',
+        'FP_hard':      '0907',
     }
 
     type_name = ["HSIL", "LSIL", "ASC-US", "AGC", "nGEC", "HCG", "SSC", "Candidate"]  # , "Normal"] #normal 不需要展示
