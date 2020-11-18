@@ -2,8 +2,10 @@
 import MySQLdb
 
 HOST = 'localhost'
-USER = 'gxb'
-PASSWORD = '1181895140'
+# USER = 'gxb'
+# PASSWORD = '1181895140'
+USER = '***'
+PASSWORD = '***'
 DB = 'das'
 CHARSET = 'utf8'
 
@@ -44,43 +46,17 @@ class MySQLProxy:
             self._db.close()
 
     
-    def insert_into_class_code(self, data):
-        sql = '''
-                insert into class_code 
-                (code, class, anno)
-                values
-                ('%s', '%s', '%s')
-        '''\
-        % (data['code'], data['class'], data['anno'])
-        cursor = self._db.cursor()
-        # try:
-        cursor.execute(sql)
-        self._db.commit()
-        # except:
-        #     print('insert into class_code error')
-        #     self._db.rollback()
-
-    def create_slide_sub_class(self):
-        '''
-        ����slide_sub_class��
-        :return:
-        '''
+    def create_table_ANNO_DETECTION(self):
         create_table_sql = '''
-                    create table slide_sub_class (
-                    id int not null auto_increment,
-                    slide_name varchar(60) not null,
-                    slide_group varchar(50),
-                    slide_format varchar(20),
-                    pro_method varchar(20),
-                    image_method varchar(20),
-                    age int,
-                    Medical_history varchar(60),
-                    sub_class varchar(60),
-                    primary key (id)
-                    )
-                    '''
-        cursor = self._db.cursor()
-        cursor.execute(create_table_sql)
+                            CREATE TABLE `anno_detection` (
+                            `id` bigint NOT NULL AUTO_INCREMENT,
+                            `aid` bigint NOT NULL,
+                            `detection_box` varchar(100) DEFAULT NULL,
+                            PRIMARY KEY (`id`),
+                            UNIQUE KEY `aid_UNIQUE` (`aid`)
+                            ) ENGINE=InnoDB AUTO_INCREMENT=48930 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+                            '''
+        self.exceute_update(create_table_sql)
 
     def create_slide_hard(self):
         '''
@@ -179,81 +155,5 @@ class MySQLProxy:
         # except:
         #     print('error')
         #     self._db.rollback()
-
-# # get cursor
-# cursor = db.cursor()
-# create_table_sql = '''CREATE TABLE EMPLOYEE (
-#                          FIRST_NAME  CHAR(20) NOT NULL,
-#                          LAST_NAME  CHAR(20),
-#                          AGE INT,
-#                          SEX CHAR(1),
-#                          INCOME FLOAT )'''
-# cursor.execute(create_table_sql)
-# db.close()
-import os
-from format_conversion.xml_tools import *
-
-
-def concret_xml(xml_path):
-    
-    xmls = os.listdir(xml_path)
-    for xml in xmls:
-        current_path = os.path.join(xml_path, xml)
-        if xml.find('.xml') != -1:
-            # uints = current_path.split('\\')
-            # key = uints[1] + ',' + uints[2] + ',' + uints[3]
-            # if key in xml_map.keys():
-            #     xml_map[key] += 1
-            # else:
-            #     xml_map[key] = 0
-            # if current_path.find('1180000') == -1:
-            #     continue
-            print(current_path)
-            # continue
-            slide_info, annos, _ = read_xml_slide_anno(current_path)
-            data = dict()
-            data['slide_path'] = slide_info.slide_path().replace('\\', '/')
-            data['slide_name'] = slide_info.slide_name()
-            data['slide_group'] = slide_info.slide_group()
-            data['pro_method'] = slide_info.pro_method()
-            data['image_method'] = slide_info.image_method()
-            data['mpp'] = slide_info.mpp()
-            data['zoom'] = slide_info.zoom()
-            data['slide_format'] = slide_info.slide_format()
-            data['is_positive'] = slide_info.is_positive()
-            data['width'] = slide_info.width()
-            data['height'] = slide_info.height()
-            data['bounds_x'] = slide_info.bounds_x()
-            data['bounds_y'] = slide_info.bounds_y()
-            for anno in annos:
-                anno_dict = dict()
-                anno_dict['center_point'] = anno.center_point()
-                anno_dict['cir_rect'] = anno.cir_rect()
-                anno_dict['anno_class'] = anno.anno_class()
-                anno_dict['anno_code'] = anno.anno_code()
-                anno_dict['type'] = anno.type()
-                anno_dict['color'] = anno.color()
-                anno_dict['is_typical'] = anno.is_typical()
-                anno_dict['is_hard'] = 'No'
-                if current_path.find('hard') != -1:
-                    anno_dict['is_hard'] = 'Yes'
-                contours = ''
-                for contour in anno.contours():
-                    contours += (str(contour[0]) + ',' + str(contour[1]) + ';')
-                anno_dict['contours'] = contours
-                # print(anno_dict)
-                sql_proxy.insert_into_annotations(data, anno_dict)
-        else:
-            concret_xml(current_path)
-
-def read_all_xml(xmls_path):
-    concret_xml(xmls_path)
     
 sql_proxy = MySQLProxy()
-xml_map = dict()
-if __name__ == '__main__':
-
-    # sql_proxy = MySQLProxy()
-    sql_proxy.connect()
-    read_all_xml('L:/GXB/unified_xml/SZSQ/Shengfuyou_5th/Positive')
-    sql_proxy.close()
